@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.ui.components.GlassBox
 import com.main.sugarbreak.ui.components.GlassCard
+import com.main.sugarbreak.ui.components.SugarBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,26 +53,10 @@ fun OnboardingScreen(
 
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    // Subtle atmospheric ambient gradient tailored for dark and light palettes
-    val bgBrush = Brush.verticalGradient(
-        colors = if (isDark) {
-            listOf(
-                Color(0xFF072319),
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.background
-            )
-        } else {
-            listOf(
-                Color(0xFFE8F5E9).copy(alpha = 0.65f),
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.background
-            )
-        }
-    )
-
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
+    SugarBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -177,7 +162,6 @@ fun OnboardingScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(bgBrush)
                 .padding(paddingValues)
         ) {
             Column(
@@ -270,6 +254,7 @@ fun OnboardingScreen(
             }
         }
     }
+}
 }
 
 @Composable

@@ -1,29 +1,43 @@
-﻿package com.main.sugarbreak.ui.settings
+package com.main.sugarbreak.ui.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Spa
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.main.sugarbreak.domain.model.ChallengeBehavior
+import com.main.sugarbreak.ui.components.GlassBox
+import com.main.sugarbreak.ui.components.GlassCard
+import com.main.sugarbreak.ui.components.SugarBackground
+import com.main.sugarbreak.ui.theme.*
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,278 +46,662 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var showTimePicker by remember { mutableStateOf(false) }
+    val isDark = isSystemInDarkTheme()
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
-    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    var showTimePicker by remember { mutableStateOf(false) }
+    var showRuleDialog by remember { mutableStateOf(false) }
+    var showResetDialog by remember { mutableStateOf(false) }
+    var quotesEnabled by remember { mutableStateOf(true) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         viewModel.toggleReminder(isGranted)
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                )
-            )
-        }
-    ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Profile Preview Banner
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onNavigateToUserDetails() }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(modifier = Modifier.size(56.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
-                                .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                        )
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                                .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                                .align(Alignment.BottomEnd)
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            Text(uiState.userName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(
-                                "Active Member",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
+    SugarBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
                                 modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(percent = 50))
-                                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(percent = 50))
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                        Text("Data saved securely on device", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                            LinearProgressIndicator(
-                                progress = { 0.8f },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(6.dp)
-                                    .clip(RoundedCornerShape(percent = 50)),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                            Text("Active", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                        }
-                    }
-                }
-
-                // Section 1: Notifications & Reminders
-                SectionTitle("NOTIFICATIONS & REMINDERS")
-                SettingsCard {
-                    SettingsToggleRow(
-                        icon = Icons.Outlined.Alarm,
-                        title = "Daily Check-In Reminder",
-                        subtitle = "Evening reflection prompt",
-                        checked = uiState.reminderEnabled,
-                        onCheckedChange = { enabled ->
-                            if (enabled && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                            } else {
-                                viewModel.toggleReminder(enabled)
-                            }
-                        },
-                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        iconTint = MaterialTheme.colorScheme.primary
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-                    SettingsClickableRow(
-                        icon = Icons.Outlined.Schedule,
-                        title = "Reminder Time",
-                        onClick = { showTimePicker = true },
-                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                        iconTint = MaterialTheme.colorScheme.secondary,
-                        trailingContent = {
-                            val formatter = java.time.format.DateTimeFormatter.ofPattern("hh:mm a")
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(
-                                    text = uiState.reminderTime.format(formatter),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(6.dp))
-                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
-                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(primaryColor.copy(alpha = if (isDark) 0.20f else 0.12f))
+                                    .border(1.dp, primaryColor.copy(alpha = if (isDark) 0.35f else 0.20f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Spa,
+                                    contentDescription = null,
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(20.dp)
                                 )
-                                Icon(Icons.Outlined.ExpandMore, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                "Settings",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = (-0.5).sp
+                                ),
+                                color = if (isDark) Color.White else primaryColor
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {}) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notifications",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = if (isDark) Color(0xFF0B0F17).copy(alpha = 0.85f)
+                        else Color.White.copy(alpha = 0.82f)
+                    )
+                )
+            }
+        ) { paddingValues ->
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = primaryColor)
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    // Profile Preview Banner Card (Level 1 Elevation)
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = onNavigateToUserDetails
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Avatar with online status pip
+                            Box(modifier = Modifier.size(54.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(CircleShape)
+                                        .background(primaryColor.copy(alpha = 0.15f))
+                                        .border(2.dp, primaryContainer.copy(alpha = 0.6f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = primaryColor,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .clip(CircleShape)
+                                        .background(primaryContainer)
+                                        .border(2.dp, if (isDark) Color(0xFF131C26) else Color.White, CircleShape)
+                                        .align(Alignment.BottomEnd)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(14.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = uiState.userName,
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(50))
+                                            .background(primaryColor.copy(alpha = 0.12f))
+                                            .border(1.dp, primaryColor.copy(alpha = 0.3f), RoundedCornerShape(50))
+                                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = "Active Member",
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                            color = primaryColor
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    text = "Mindful Tracker since Sep 2026",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(6.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(if (isDark) Color(0xFF1E293B) else Color(0xFFDEE8FF))
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.80f)
+                                                .fillMaxHeight()
+                                                .clip(RoundedCornerShape(50))
+                                                .background(primaryContainer)
+                                        )
+                                    }
+                                    Text(
+                                        text = "Day 24",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = primaryColor
+                                    )
+                                }
                             }
                         }
-                    )
-                }
+                    }
 
+                    // Section 1: Notifications & Reminders
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "NOTIFICATIONS & REMINDERS",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
 
+                        GlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Column {
+                                // Row 1: Daily Check-In Reminder
+                                SettingsToggleRow(
+                                    icon = Icons.Default.Alarm,
+                                    iconTint = primaryColor,
+                                    iconBg = primaryColor.copy(alpha = 0.12f),
+                                    title = "Daily Check-In Reminder",
+                                    subtitle = "Evening reflection prompt",
+                                    checked = uiState.reminderEnabled,
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                        } else {
+                                            viewModel.toggleReminder(isChecked)
+                                        }
+                                    }
+                                )
 
-                // Footer Info
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text("SugarBreak v2.4 — Designed with care \uD83C\uDF3F", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Build 142 • Calm vitality for healthy minds", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                // Row 2: Reminder Time
+                                val timeFormatted = remember(uiState.reminderTime) {
+                                    uiState.reminderTime.format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
+                                }
+                                SettingsActionRow(
+                                    icon = Icons.Default.Schedule,
+                                    iconTint = MaterialTheme.colorScheme.secondary,
+                                    iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                                    title = "Reminder Time",
+                                    badgeText = timeFormatted,
+                                    onClick = { showTimePicker = true }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                // Row 3: Gentle Motivational Quotes
+                                SettingsToggleRow(
+                                    icon = Icons.Default.FormatQuote,
+                                    iconTint = tertiaryColor,
+                                    iconBg = tertiaryColor.copy(alpha = 0.12f),
+                                    title = "Gentle Motivational Quotes",
+                                    subtitle = "Calm & compassion-first notes",
+                                    checked = quotesEnabled,
+                                    onCheckedChange = { quotesEnabled = it }
+                                )
+                            }
+                        }
+                    }
+
+                    // Section 2: Tracking & Challenge Rules
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "TRACKING & CHALLENGE RULES",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+
+                        GlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Column {
+                                // Rule on Slip-ups
+                                val behaviorText = when (uiState.challengeBehavior) {
+                                    ChallengeBehavior.CONTINUE -> "Continue tracking normally"
+                                    ChallengeBehavior.ADD_RECOVERY_DAY -> "Add recovery day"
+                                    ChallengeBehavior.RESET_STREAK -> "Reset streak"
+                                }
+                                SettingsActionRow(
+                                    icon = Icons.Default.Sync,
+                                    iconTint = primaryColor,
+                                    iconBg = primaryColor.copy(alpha = 0.12f),
+                                    title = "Rule on Slip-ups",
+                                    subtitle = "Non-punitive mindset",
+                                    valueText = behaviorText,
+                                    onClick = { showRuleDialog = true }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                // Challenge Goal
+                                SettingsActionRow(
+                                    icon = Icons.Default.Flag,
+                                    iconTint = MaterialTheme.colorScheme.secondary,
+                                    iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                                    title = "Challenge Goal",
+                                    valueText = "30 Days Challenge",
+                                    onClick = { }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                // Excluded Sugars
+                                SettingsActionRow(
+                                    icon = Icons.Default.Egg,
+                                    iconTint = tertiaryColor,
+                                    iconBg = tertiaryColor.copy(alpha = 0.12f),
+                                    title = "Excluded Sugars",
+                                    valueText = "Added/Free sugars only",
+                                    onClick = { }
+                                )
+                            }
+                        }
+                    }
+
+                    // Section 3: Data & Philosophy
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "DATA & PHILOSOPHY",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+
+                        GlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Column {
+                                // Philosophy
+                                SettingsActionRow(
+                                    icon = Icons.Default.Favorite,
+                                    iconTint = primaryColor,
+                                    iconBg = primaryColor.copy(alpha = 0.12f),
+                                    title = "Our Non-Judgmental Philosophy",
+                                    subtitle = "Guilt-free habits & awareness",
+                                    onClick = { }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                // Export
+                                SettingsActionRow(
+                                    icon = Icons.Default.Download,
+                                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    iconBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    title = "Export Tracking Data (CSV)",
+                                    onClick = { }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                // Reset All Data
+                                SettingsActionRow(
+                                    icon = Icons.Default.DeleteOutline,
+                                    iconTint = MaterialTheme.colorScheme.error,
+                                    iconBg = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+                                    title = "Reset All Data",
+                                    badgeText = "Caution",
+                                    badgeColor = MaterialTheme.colorScheme.error,
+                                    onClick = { showResetDialog = true }
+                                )
+                            }
+                        }
+                    }
+
+                    // App Version Footer
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            text = "SugarBreak v2.4 — Designed with care 🌿",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Build 142 • Calm vitality for healthy minds",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+        }
 
-            if (showTimePicker) {
-                val timePickerState = rememberTimePickerState(
-                    initialHour = uiState.reminderTime.hour,
-                    initialMinute = uiState.reminderTime.minute
-                )
-                
-                AlertDialog(
-                    onDismissRequest = { showTimePicker = false },
-                    confirmButton = {
-                        TextButton(onClick = {
+        // Time Picker Modal Dialog
+        if (showTimePicker) {
+            val timePickerState = rememberTimePickerState(
+                initialHour = uiState.reminderTime.hour,
+                initialMinute = uiState.reminderTime.minute,
+                is24Hour = false
+            )
+
+            AlertDialog(
+                onDismissRequest = { showTimePicker = false },
+                title = {
+                    Text(
+                        "Set Reminder Time",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                },
+                text = {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        TimePicker(state = timePickerState)
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
                             viewModel.updateReminderTime(LocalTime.of(timePickerState.hour, timePickerState.minute))
                             showTimePicker = false
-                        }) {
-                            Text("OK", color = MaterialTheme.colorScheme.primary)
                         }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showTimePicker = false }) {
-                            Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    ) {
+                        Text("Save", fontWeight = FontWeight.Bold, color = primaryColor)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTimePicker = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.outline)
+                    }
+                }
+            )
+        }
+
+        // Challenge Behavior Rule Selection Dialog
+        if (showRuleDialog) {
+            AlertDialog(
+                onDismissRequest = { showRuleDialog = false },
+                title = {
+                    Text(
+                        "Rule on Slip-ups",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ChallengeBehavior.entries.forEach { behavior ->
+                            val isSelected = uiState.challengeBehavior == behavior
+                            val label = when (behavior) {
+                                ChallengeBehavior.CONTINUE -> "Continue tracking normally (Recommended)"
+                                ChallengeBehavior.ADD_RECOVERY_DAY -> "Add recovery day"
+                                ChallengeBehavior.RESET_STREAK -> "Reset streak"
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) primaryColor.copy(alpha = 0.12f)
+                                        else Color.Transparent
+                                    )
+                                    .clickable {
+                                        viewModel.updateChallengeBehavior(behavior)
+                                        showRuleDialog = false
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = isSelected,
+                                    onClick = {
+                                        viewModel.updateChallengeBehavior(behavior)
+                                        showRuleDialog = false
+                                    },
+                                    colors = RadioButtonDefaults.colors(selectedColor = primaryColor)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
-                    },
-                    text = {
-                        TimePicker(state = timePickerState)
-                    },
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showRuleDialog = false }) {
+                        Text("Close", color = primaryColor)
+                    }
+                }
+            )
+        }
+
+        // Reset Data Confirmation Dialog
+        if (showResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetDialog = false },
+                title = { Text("Reset All Data", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
+                text = {
+                    Text("Are you sure you want to reset your logs? This action is intended to give you a fresh mindful start.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showResetDialog = false
+                        }
+                    ) {
+                        Text("Reset", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.outline,
-        modifier = Modifier.padding(start = 8.dp, top = 8.dp)
-    )
-}
-
-@Composable
-fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-    ) {
-        Column(modifier = Modifier.fillMaxWidth(), content = content)
-    }
-}
-
-@Composable
-fun SettingsToggleRow(
+private fun SettingsToggleRow(
     icon: ImageVector,
+    iconTint: Color,
+    iconBg: Color,
     title: String,
     subtitle: String? = null,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    iconBackground: Color,
-    iconTint: Color
+    onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
-                .background(iconBackground, RoundedCornerShape(8.dp)),
+                .size(34.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(iconBg),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
         }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
             if (subtitle != null) {
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
+
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primaryContainer)
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+            )
         )
     }
 }
 
 @Composable
-fun SettingsClickableRow(
+private fun SettingsActionRow(
     icon: ImageVector,
+    iconTint: Color,
+    iconBg: Color,
     title: String,
     subtitle: String? = null,
-    onClick: () -> Unit,
-    iconBackground: Color,
-    iconTint: Color,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface,
-    trailingContent: @Composable () -> Unit
+    valueText: String? = null,
+    badgeText: String? = null,
+    badgeColor: Color = MaterialTheme.colorScheme.primary,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
-                .background(iconBackground, RoundedCornerShape(8.dp)),
+                .size(34.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(iconBg),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
         }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = titleColor)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
             if (subtitle != null) {
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-        trailingContent()
+
+        if (badgeText != null) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(badgeColor.copy(alpha = 0.12f))
+                    .border(1.dp, badgeColor.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = badgeText,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = badgeColor
+                )
+            }
+        }
+
+        if (valueText != null) {
+            Text(
+                text = valueText,
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(end = 4.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.NavigateNext,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(18.dp)
+        )
     }
 }

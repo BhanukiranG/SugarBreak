@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.theme
+package com.main.sugarbreak.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -36,6 +36,13 @@ private val LightColorScheme = lightColorScheme(
     onSurface = onSurfaceLight,
     surfaceVariant = surfaceVariantLight,
     onSurfaceVariant = onSurfaceVariantLight,
+    surfaceDim = surfaceDimLight,
+    surfaceBright = surfaceBrightLight,
+    surfaceContainerLowest = surfaceContainerLowestLight,
+    surfaceContainerLow = surfaceContainerLowLight,
+    surfaceContainer = surfaceContainerLight,
+    surfaceContainerHigh = surfaceContainerHighLight,
+    surfaceContainerHighest = surfaceContainerHighestLight,
     outline = outlineLight,
     outlineVariant = outlineVariantLight
 )
@@ -63,6 +70,13 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = onSurfaceDark,
     surfaceVariant = surfaceVariantDark,
     onSurfaceVariant = onSurfaceVariantDark,
+    surfaceDim = surfaceDimDark,
+    surfaceBright = surfaceBrightDark,
+    surfaceContainerLowest = surfaceContainerLowestDark,
+    surfaceContainerLow = surfaceContainerLowDark,
+    surfaceContainer = surfaceContainerDark,
+    surfaceContainerHigh = surfaceContainerHighDark,
+    surfaceContainerHighest = surfaceContainerHighestDark,
     outline = outlineDark,
     outlineVariant = outlineVariantDark
 )
