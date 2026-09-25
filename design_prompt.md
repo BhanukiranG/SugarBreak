@@ -1,6 +1,6 @@
 ### 🎨 Prompt for UI/UX Design Generation:
 
-**App Name:** SugarBreak (or NoSugar)
+**App Name:** SugarBreak
 **App Core Concept:** A mobile application designed to help users track and reduce their added/free sugar consumption through simple daily awareness. It emphasizes a supportive, non-judgmental, and positive approach to habit tracking.
 **Design Style & Vibe:** Modern, clean, uplifting, and premium. Use a soft and encouraging color palette (mint greens, soft blues, warm neutrals) to reduce guilt. Implement glassmorphism for cards, large readable typography, and smooth micro-animations. The app should feel native, highly responsive, and user-friendly.
 

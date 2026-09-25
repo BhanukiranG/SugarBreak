@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "No Sugar"
+rootProject.name = "SugarBreak"
 include(":app")
  

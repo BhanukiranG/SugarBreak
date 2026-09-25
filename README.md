@@ -26,7 +26,7 @@ The project is organized by feature within the core layers:
 
 ## Setup and Installation
 
-1.  **Clone / Open the Project**: Open the project folder `NoSugar` in Android Studio (Ladybug or newer recommended).
+1.  **Clone / Open the Project**: Open the project folder `SugarBreak` in Android Studio (Ladybug or newer recommended).
 2.  **Gradle Sync**: Allow Gradle to sync dependencies. The project uses a `libs.versions.toml` catalog for dependency management.
 3.  **Run the App**: Select a device or emulator running API 24 (Android 7.0) or higher. 
 4.  **Permissions**: On Android 13+, the app will request Notification permissions to send daily reminders. Exact alarm permissions are requested seamlessly. 

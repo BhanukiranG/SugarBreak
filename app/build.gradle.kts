@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.main.nosugar"
+    namespace = "com.main.sugarbreak"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.main.nosugar"
+        applicationId = "com.main.sugarbreak"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
