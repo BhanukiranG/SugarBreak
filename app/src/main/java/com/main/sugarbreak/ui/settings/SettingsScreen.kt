@@ -2,6 +2,7 @@ package com.main.sugarbreak.ui.settings
 
 import android.Manifest
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -14,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -22,19 +22,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.sugarbreak.domain.model.ChallengeBehavior
-import com.main.sugarbreak.ui.components.GlassBox
 import com.main.sugarbreak.ui.components.GlassCard
 import com.main.sugarbreak.ui.components.SugarBackground
-import com.main.sugarbreak.ui.theme.*
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -47,14 +45,18 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isDark = isSystemInDarkTheme()
+    val context = LocalContext.current
+
     val primaryColor = MaterialTheme.colorScheme.primary
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
     var showTimePicker by remember { mutableStateOf(false) }
     var showRuleDialog by remember { mutableStateOf(false) }
+    var showGoalDialog by remember { mutableStateOf(false) }
+    var showExcludedSugarsDialog by remember { mutableStateOf(false) }
+    var showPhilosophyDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
-    var quotesEnabled by remember { mutableStateOf(true) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -96,10 +98,10 @@ fun SettingsScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = { showTimePicker = true }) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
+                                contentDescription = "Reminder Settings",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -129,7 +131,7 @@ fun SettingsScreen(
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
-                    // Profile Preview Banner Card (Level 1 Elevation)
+                    // Profile Preview Banner Card
                     GlassCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
@@ -141,7 +143,6 @@ fun SettingsScreen(
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Avatar with online status pip
                             Box(modifier = Modifier.size(54.dp)) {
                                 Box(
                                     modifier = Modifier
@@ -199,38 +200,10 @@ fun SettingsScreen(
                                 }
 
                                 Text(
-                                    text = "Mindful Tracker since Sep 2026",
+                                    text = "Mindful Tracker",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(6.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(if (isDark) Color(0xFF1E293B) else Color(0xFFDEE8FF))
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth(0.80f)
-                                                .fillMaxHeight()
-                                                .clip(RoundedCornerShape(50))
-                                                .background(primaryContainer)
-                                        )
-                                    }
-                                    Text(
-                                        text = "Day 24",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = primaryColor
-                                    )
-                                }
                             }
                         }
                     }
@@ -252,7 +225,6 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column {
-                                // Row 1: Daily Check-In Reminder
                                 SettingsToggleRow(
                                     icon = Icons.Default.Alarm,
                                     iconTint = primaryColor,
@@ -271,7 +243,6 @@ fun SettingsScreen(
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
-                                // Row 2: Reminder Time
                                 val timeFormatted = remember(uiState.reminderTime) {
                                     uiState.reminderTime.format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
                                 }
@@ -286,15 +257,14 @@ fun SettingsScreen(
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
-                                // Row 3: Gentle Motivational Quotes
                                 SettingsToggleRow(
                                     icon = Icons.Default.FormatQuote,
                                     iconTint = tertiaryColor,
                                     iconBg = tertiaryColor.copy(alpha = 0.12f),
                                     title = "Gentle Motivational Quotes",
                                     subtitle = "Calm & compassion-first notes",
-                                    checked = quotesEnabled,
-                                    onCheckedChange = { quotesEnabled = it }
+                                    checked = uiState.quotesEnabled,
+                                    onCheckedChange = { viewModel.toggleQuotesEnabled(it) }
                                 )
                             }
                         }
@@ -317,7 +287,6 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column {
-                                // Rule on Slip-ups
                                 val behaviorText = when (uiState.challengeBehavior) {
                                     ChallengeBehavior.CONTINUE -> "Continue tracking normally"
                                     ChallengeBehavior.ADD_RECOVERY_DAY -> "Add recovery day"
@@ -335,26 +304,24 @@ fun SettingsScreen(
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
-                                // Challenge Goal
                                 SettingsActionRow(
                                     icon = Icons.Default.Flag,
                                     iconTint = MaterialTheme.colorScheme.secondary,
                                     iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
                                     title = "Challenge Goal",
-                                    valueText = "30 Days Challenge",
-                                    onClick = { }
+                                    valueText = "${uiState.challengeGoalDays} Days Challenge",
+                                    onClick = { showGoalDialog = true }
                                 )
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
-                                // Excluded Sugars
                                 SettingsActionRow(
                                     icon = Icons.Default.Egg,
                                     iconTint = tertiaryColor,
                                     iconBg = tertiaryColor.copy(alpha = 0.12f),
                                     title = "Excluded Sugars",
                                     valueText = "Added/Free sugars only",
-                                    onClick = { }
+                                    onClick = { showExcludedSugarsDialog = true }
                                 )
                             }
                         }
@@ -377,30 +344,27 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column {
-                                // Philosophy
                                 SettingsActionRow(
                                     icon = Icons.Default.Favorite,
                                     iconTint = primaryColor,
                                     iconBg = primaryColor.copy(alpha = 0.12f),
                                     title = "Our Non-Judgmental Philosophy",
                                     subtitle = "Guilt-free habits & awareness",
-                                    onClick = { }
+                                    onClick = { showPhilosophyDialog = true }
                                 )
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
-                                // Export
                                 SettingsActionRow(
                                     icon = Icons.Default.Download,
                                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     iconBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                                     title = "Export Tracking Data (CSV)",
-                                    onClick = { }
+                                    onClick = { viewModel.exportDataCsv(context) }
                                 )
 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
-                                // Reset All Data
                                 SettingsActionRow(
                                     icon = Icons.Default.DeleteOutline,
                                     iconTint = MaterialTheme.colorScheme.error,
@@ -540,18 +504,161 @@ fun SettingsScreen(
             )
         }
 
+        // Challenge Goal Selection Dialog
+        if (showGoalDialog) {
+            val goals = listOf(7, 14, 21, 30, 60)
+            AlertDialog(
+                onDismissRequest = { showGoalDialog = false },
+                title = {
+                    Text(
+                        "Select Challenge Goal",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        goals.forEach { targetDays ->
+                            val isSelected = uiState.challengeGoalDays == targetDays
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) primaryColor.copy(alpha = 0.12f)
+                                        else Color.Transparent
+                                    )
+                                    .clickable {
+                                        viewModel.updateChallengeGoal(targetDays)
+                                        showGoalDialog = false
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = isSelected,
+                                    onClick = {
+                                        viewModel.updateChallengeGoal(targetDays)
+                                        showGoalDialog = false
+                                    },
+                                    colors = RadioButtonDefaults.colors(selectedColor = primaryColor)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "$targetDays Days Challenge",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showGoalDialog = false }) {
+                        Text("Close", color = primaryColor)
+                    }
+                }
+            )
+        }
+
+        // Excluded Sugars Info Dialog
+        if (showExcludedSugarsDialog) {
+            AlertDialog(
+                onDismissRequest = { showExcludedSugarsDialog = false },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Egg,
+                            contentDescription = null,
+                            tint = tertiaryColor,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Excluded Sugars Guidelines",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "SugarBreak targets Added and Free Sugars to support healthy metabolic balance:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "• Avoided: Table sugar, syrups, soda, packaged desserts, candy, and sweetened snacks.\n• Allowed: Naturally occurring sugars in whole fresh fruits and plain dairy products.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showExcludedSugarsDialog = false }) {
+                        Text("Got it", fontWeight = FontWeight.Bold, color = primaryColor)
+                    }
+                }
+            )
+        }
+
+        // Non-Judgmental Philosophy Dialog
+        if (showPhilosophyDialog) {
+            AlertDialog(
+                onDismissRequest = { showPhilosophyDialog = false },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = primaryColor,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Our Mindful Philosophy",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "“Awareness without shame, progress without perfection.”",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = primaryColor
+                        )
+                        Text(
+                            text = "SugarBreak is built on a compassion-first foundation. Slip-ups are valuable data points, not failures. Every conscious decision to reset brings long-term vitality.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPhilosophyDialog = false }) {
+                        Text("Understand", fontWeight = FontWeight.Bold, color = primaryColor)
+                    }
+                }
+            )
+        }
+
         // Reset Data Confirmation Dialog
         if (showResetDialog) {
             AlertDialog(
                 onDismissRequest = { showResetDialog = false },
                 title = { Text("Reset All Data", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
                 text = {
-                    Text("Are you sure you want to reset your logs? This action is intended to give you a fresh mindful start.")
+                    Text("Are you sure you want to reset your logs? This will clear past check-in records for a fresh start.")
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            showResetDialog = false
+                            viewModel.resetAllData {
+                                showResetDialog = false
+                                Toast.makeText(context, "All tracking data has been reset", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     ) {
                         Text("Reset", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)

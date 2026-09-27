@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.data.preferences
+package com.main.sugarbreak.data.preferences
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -21,6 +21,7 @@ class PreferencesManager(private val context: Context) {
         val ONBOARDING_COMPLETED = booleanPreferencesKey("ONBOARDING_COMPLETED")
         val CHALLENGE_BEHAVIOR = stringPreferencesKey("CHALLENGE_BEHAVIOR")
         val USER_NAME = stringPreferencesKey("USER_NAME")
+        val QUOTES_ENABLED = booleanPreferencesKey("QUOTES_ENABLED")
     }
 
     val reminderEnabled: Flow<Boolean> = context.dataStore.data.map { it[REMINDER_ENABLED] ?: false }
@@ -29,6 +30,7 @@ class PreferencesManager(private val context: Context) {
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
     val challengeBehavior: Flow<String?> = context.dataStore.data.map { it[CHALLENGE_BEHAVIOR] }
     val userName: Flow<String?> = context.dataStore.data.map { it[USER_NAME] }
+    val quotesEnabled: Flow<Boolean> = context.dataStore.data.map { it[QUOTES_ENABLED] ?: true }
 
     suspend fun setReminderEnabled(enabled: Boolean) {
         context.dataStore.edit { it[REMINDER_ENABLED] = enabled }
@@ -51,5 +53,9 @@ class PreferencesManager(private val context: Context) {
 
     suspend fun setUserName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
+    }
+
+    suspend fun setQuotesEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[QUOTES_ENABLED] = enabled }
     }
 }

@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.statistics
+package com.main.sugarbreak.ui.statistics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +21,7 @@ data class StatisticsUiState(
     val slipDays: Int = 0,
     val successRate: Float = 0f,
     val challengeProgress: Float = 0f,
+    val targetGoalDays: Int = 30,
     val isLoading: Boolean = true
 )
 
@@ -55,6 +56,7 @@ class StatisticsViewModel @Inject constructor(
                                 slipDays = summary.slipDays,
                                 successRate = summary.successRate,
                                 challengeProgress = progress,
+                                targetGoalDays = challenge.targetSuccessfulDays,
                                 isLoading = false
                             ) 
                         }

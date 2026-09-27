@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.data.repository
+package com.main.sugarbreak.data.repository
 
 import com.main.sugarbreak.data.local.dao.DailyCheckInDao
 import com.main.sugarbreak.data.mapper.toDomain
@@ -31,5 +31,9 @@ class CheckInRepositoryImpl @Inject constructor(
 
     override suspend fun getAllCheckInsForChallengeSync(challengeId: Long): List<DailyCheckIn> {
         return dailyCheckInDao.getAllCheckInsForChallengeSync(challengeId).map { it.toDomain() }
+    }
+
+    override suspend fun deleteAllCheckInsForChallenge(challengeId: Long) {
+        dailyCheckInDao.deleteAllCheckInsForChallenge(challengeId)
     }
 }

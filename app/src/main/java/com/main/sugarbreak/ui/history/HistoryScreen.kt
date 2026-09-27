@@ -55,7 +55,6 @@ fun HistoryScreen(
     val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer
 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
-    var selectedDate by remember { mutableStateOf<LocalDate?>(LocalDate.now()) }
 
     // Pulsing animation for today's active ring
     val infiniteTransition = rememberInfiniteTransition(label = "pulseRing")
@@ -138,9 +137,6 @@ fun HistoryScreen(
                 val daysInMonth = currentMonth.lengthOfMonth()
                 val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value // 1 = Monday, 7 = Sunday
                 val today = LocalDate.now()
-
-                val activeSelectedDate = selectedDate ?: today
-                val selectedRecord = recordsMap[activeSelectedDate]
 
                 Column(
                     modifier = Modifier
@@ -380,7 +376,6 @@ fun HistoryScreen(
                                             val date = currentMonth.atDay(dayIndex)
                                             val record = recordsMap[date]
                                             val isToday = date == today
-                                            val isSelected = date == activeSelectedDate
                                             val isFuture = date.isAfter(today)
 
                                             val status = record?.status
@@ -401,7 +396,6 @@ fun HistoryScreen(
                                             }
 
                                             val borderModifier = when {
-                                                isSelected -> Modifier.border(2.dp, primaryColor, CircleShape)
                                                 isToday -> Modifier.border(2.dp, primaryColor.copy(alpha = pulseAlpha), CircleShape)
                                                 isFuture -> Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), CircleShape)
                                                 status == CheckInStatus.SLIP -> Modifier.border(1.dp, tertiaryContainer.copy(alpha = 0.4f), CircleShape)
@@ -413,8 +407,7 @@ fun HistoryScreen(
                                                     .size(38.dp)
                                                     .clip(CircleShape)
                                                     .background(cellBg)
-                                                    .then(borderModifier)
-                                                    .clickable { selectedDate = date },
+                                                    .then(borderModifier),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Column(
@@ -424,7 +417,7 @@ fun HistoryScreen(
                                                     Text(
                                                         text = "$dayIndex",
                                                         fontSize = 11.sp,
-                                                        fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.SemiBold,
+                                                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.SemiBold,
                                                         color = cellTextColor,
                                                         lineHeight = 12.sp
                                                     )
@@ -525,265 +518,6 @@ fun HistoryScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Upcoming", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        }
-                    }
-
-                    // Selected Day Detail Card (Level 2 Elevated Glass Card)
-                    GlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(22.dp),
-                        isElevated = true
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            // Accent Top Edge Gradient Strip
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(4.dp)
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            colors = listOf(
-                                                primaryColor,
-                                                primaryContainer,
-                                                MaterialTheme.colorScheme.secondaryContainer
-                                            )
-                                        )
-                                    )
-                            )
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(20.dp),
-                                verticalArrangement = Arrangement.spacedBy(14.dp)
-                            ) {
-                                val isLogSuccess = selectedRecord?.status == CheckInStatus.SUCCESS
-                                val isLogSlip = selectedRecord?.status == CheckInStatus.SLIP
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = "SELECTED DAILY LOG",
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                letterSpacing = 1.sp
-                                            ),
-                                            color = primaryColor
-                                        )
-                                        Text(
-                                            text = "${activeSelectedDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${activeSelectedDate.dayOfMonth}, ${activeSelectedDate.year}",
-                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
-
-                                    // Status Pill Badge
-                                    val statusBg = if (isLogSuccess) primaryColor.copy(alpha = 0.12f)
-                                    else if (isLogSlip) tertiaryColor.copy(alpha = 0.12f)
-                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-
-                                    val statusColor = if (isLogSuccess) primaryColor
-                                    else if (isLogSlip) tertiaryColor
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(50))
-                                            .background(statusBg)
-                                            .border(1.dp, statusColor.copy(alpha = 0.35f), RoundedCornerShape(50))
-                                            .padding(horizontal = 12.dp, vertical = 5.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = if (isLogSuccess) Icons.Default.Eco else if (isLogSlip) Icons.Default.Favorite else Icons.Default.Schedule,
-                                                contentDescription = null,
-                                                tint = statusColor,
-                                                modifier = Modifier.size(14.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(
-                                                text = if (isLogSuccess) "Stayed on Track" else if (isLogSlip) "Gentle Slip" else "Rest Day",
-                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                                color = statusColor
-                                            )
-                                        }
-                                    }
-                                }
-
-                                // Metric Highlight Bento Mini Grid
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    // Sugar Avoided Card
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(14.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
-                                            .padding(12.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(36.dp)
-                                                    .clip(CircleShape)
-                                                    .background(primaryColor.copy(alpha = 0.15f)),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.WaterDrop,
-                                                    contentDescription = null,
-                                                    tint = primaryColor,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Column {
-                                                Text(
-                                                    text = "Sugar Avoided",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.outline
-                                                )
-                                                Text(
-                                                    text = if (isLogSuccess) "~36g" else "0g",
-                                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                                    color = primaryColor
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    // Craving Peak Card
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(14.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
-                                            .padding(12.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(36.dp)
-                                                    .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Bolt,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.secondary,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Column {
-                                                Text(
-                                                    text = "Craving Peak",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.outline
-                                                )
-                                                Text(
-                                                    text = if (isLogSuccess) "Mild (2/10)" else "Moderate (5/10)",
-                                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                                    color = MaterialTheme.colorScheme.secondary
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // Mindful Reflection Quotation Box
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(14.dp))
-                                        .background(if (isDark) Color(0xFF131C26).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.7f))
-                                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
-                                        .padding(14.dp)
-                                ) {
-                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(
-                                                    imageVector = Icons.Default.EditNote,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.outline,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                                Text(
-                                                    text = "Mindful Reflection",
-                                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                    color = MaterialTheme.colorScheme.outline
-                                                )
-                                            }
-                                            Text(
-                                                text = "8:45 PM",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.outline
-                                            )
-                                        }
-                                        Text(
-                                            text = if (isLogSuccess) "“Drank lemon sparkling water instead of soda at dinner!”"
-                                            else if (isLogSlip) "“Had a slice of birthday cake with friends. Acknowledged and moving forward.”"
-                                            else "“Taking time to rest and reset awareness.”",
-                                            style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
-                                }
-
-                                // Mood indication & Action Footer
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.SentimentSatisfied,
-                                            contentDescription = null,
-                                            tint = primaryColor,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(
-                                            text = if (isLogSuccess) "Felt energized & clear-headed" else "Practicing self-compassion",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.clickable { }
-                                    ) {
-                                        Text(
-                                            text = "Logged",
-                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = primaryColor
-                                        )
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.NavigateNext,
-                                            contentDescription = null,
-                                            tint = primaryColor,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
                                 }
                             }
                         }

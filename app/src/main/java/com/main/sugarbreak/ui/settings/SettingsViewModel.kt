@@ -1,22 +1,29 @@
-﻿package com.main.sugarbreak.ui.settings
+package com.main.sugarbreak.ui.settings
 
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.main.sugarbreak.domain.model.Challenge
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.domain.model.ReminderSettings
+import com.main.sugarbreak.domain.repository.ChallengeRepository
+import com.main.sugarbreak.domain.repository.CheckInRepository
 import com.main.sugarbreak.domain.repository.PreferencesRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import com.main.sugarbreak.domain.usecase.ScheduleReminderUseCase
 import com.main.sugarbreak.domain.usecase.CancelReminderUseCase
+import com.main.sugarbreak.domain.usecase.GetActiveChallengeUseCase
+import com.main.sugarbreak.domain.usecase.ScheduleReminderUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import java.time.LocalTime
+import javax.inject.Inject
 
 data class SettingsUiState(
     val reminderEnabled: Boolean = false,
@@ -24,12 +31,18 @@ data class SettingsUiState(
     val trackingRule: String = "Strict",
     val challengeBehavior: ChallengeBehavior = ChallengeBehavior.CONTINUE,
     val userName: String = "Local Profile",
+    val quotesEnabled: Boolean = true,
+    val challengeGoalDays: Int = 30,
+    val activeChallengeId: Long? = null,
     val isLoading: Boolean = true
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
+    private val getActiveChallengeUseCase: GetActiveChallengeUseCase,
+    private val challengeRepository: ChallengeRepository,
+    private val checkInRepository: CheckInRepository,
     private val scheduleReminderUseCase: ScheduleReminderUseCase,
     private val cancelReminderUseCase: CancelReminderUseCase
 ) : ViewModel() {
@@ -42,16 +55,21 @@ class SettingsViewModel @Inject constructor(
             combine(
                 preferencesRepository.getReminderSettings(),
                 preferencesRepository.getChallengeBehavior(),
-                preferencesRepository.getUserName()
-            ) { reminderSettings, behavior, userName ->
-                Triple(reminderSettings, behavior, userName)
-            }.collectLatest { (reminderSettings, behavior, userName) ->
+                preferencesRepository.getUserName(),
+                preferencesRepository.getQuotesEnabled(),
+                getActiveChallengeUseCase()
+            ) { reminderSettings, behavior, userName, quotes, challenge ->
+                SettingsTuple(reminderSettings, behavior, userName, quotes, challenge)
+            }.collectLatest { tuple ->
                 _uiState.update { 
                     it.copy(
-                        reminderEnabled = reminderSettings.enabled,
-                        reminderTime = LocalTime.of(reminderSettings.hour, reminderSettings.minute),
-                        challengeBehavior = behavior,
-                        userName = userName,
+                        reminderEnabled = tuple.reminderSettings.enabled,
+                        reminderTime = LocalTime.of(tuple.reminderSettings.hour, tuple.reminderSettings.minute),
+                        challengeBehavior = tuple.behavior,
+                        userName = tuple.userName,
+                        quotesEnabled = tuple.quotes,
+                        challengeGoalDays = tuple.challenge?.targetSuccessfulDays ?: 30,
+                        activeChallengeId = tuple.challenge?.id,
                         isLoading = false
                     ) 
                 }
@@ -96,4 +114,61 @@ class SettingsViewModel @Inject constructor(
             preferencesRepository.setUserName(name)
         }
     }
+
+    fun toggleQuotesEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setQuotesEnabled(enabled)
+        }
+    }
+
+    fun updateChallengeGoal(targetDays: Int) {
+        viewModelScope.launch {
+            val currentChallenge = getActiveChallengeUseCase().first()
+            if (currentChallenge != null) {
+                val updated = currentChallenge.copy(targetSuccessfulDays = targetDays)
+                challengeRepository.update(updated)
+            }
+        }
+    }
+
+    fun resetAllData(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            val activeChallengeId = _uiState.value.activeChallengeId
+            if (activeChallengeId != null) {
+                checkInRepository.deleteAllCheckInsForChallenge(activeChallengeId)
+            }
+            onComplete()
+        }
+    }
+
+    fun exportDataCsv(context: Context) {
+        viewModelScope.launch {
+            val activeChallengeId = _uiState.value.activeChallengeId
+            if (activeChallengeId != null) {
+                val records = checkInRepository.getAllCheckInsForChallengeSync(activeChallengeId)
+                val csvBuilder = StringBuilder()
+                csvBuilder.append("Date,Status,Reason\n")
+                records.forEach { record ->
+                    val reasonText = record.reason?.name ?: "None"
+                    csvBuilder.append("${record.date},${record.status},$reasonText\n")
+                }
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, "SugarBreak Tracking Data")
+                    putExtra(Intent.EXTRA_TEXT, csvBuilder.toString())
+                }
+                val chooser = Intent.createChooser(intent, "Export Tracking Data")
+                chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(chooser)
+            }
+        }
+    }
 }
+
+private data class SettingsTuple(
+    val reminderSettings: ReminderSettings,
+    val behavior: ChallengeBehavior,
+    val userName: String,
+    val quotes: Boolean,
+    val challenge: Challenge?
+)

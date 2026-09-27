@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.data.repository
+package com.main.sugarbreak.data.repository
 
 import com.main.sugarbreak.data.preferences.PreferencesManager
 import com.main.sugarbreak.domain.model.ChallengeBehavior
@@ -52,5 +52,13 @@ class PreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun setUserName(name: String) {
         preferencesManager.setUserName(name)
+    }
+
+    override fun getQuotesEnabled(): Flow<Boolean> {
+        return preferencesManager.quotesEnabled
+    }
+
+    override suspend fun setQuotesEnabled(enabled: Boolean) {
+        preferencesManager.setQuotesEnabled(enabled)
     }
 }

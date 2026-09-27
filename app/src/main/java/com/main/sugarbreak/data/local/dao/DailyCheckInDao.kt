@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.data.local.dao
+package com.main.sugarbreak.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -25,4 +25,7 @@ interface DailyCheckInDao {
 
     @Query("SELECT * FROM daily_check_ins WHERE challengeId = :challengeId ORDER BY date ASC")
     suspend fun getAllCheckInsForChallengeSync(challengeId: Long): List<DailyCheckInEntity>
+
+    @Query("DELETE FROM daily_check_ins WHERE challengeId = :challengeId")
+    suspend fun deleteAllCheckInsForChallenge(challengeId: Long)
 }

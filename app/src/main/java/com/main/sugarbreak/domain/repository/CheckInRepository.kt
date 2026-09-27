@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.domain.repository
+package com.main.sugarbreak.domain.repository
 
 import com.main.sugarbreak.domain.model.DailyCheckIn
 import kotlinx.coroutines.flow.Flow
@@ -10,4 +10,5 @@ interface CheckInRepository {
     suspend fun getCheckInForDate(challengeId: Long, date: LocalDate): DailyCheckIn?
     fun getCheckInsForChallenge(challengeId: Long): Flow<List<DailyCheckIn>>
     suspend fun getAllCheckInsForChallengeSync(challengeId: Long): List<DailyCheckIn>
+    suspend fun deleteAllCheckInsForChallenge(challengeId: Long)
 }

@@ -352,8 +352,7 @@ fun HomeScreen(
 
                             Spacer(modifier = Modifier.height(18.dp))
 
-                            // Sugar Saved Callout Box
-                            val sugarSaved = successfulDays * 40
+                            // Mindful Momentum Callout Box
                             GlassBox(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(14.dp),
@@ -381,7 +380,7 @@ fun HomeScreen(
                                     }
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Text(
-                                        text = "You've saved ~$sugarSaved g of added sugar!",
+                                        text = "Great job staying mindful and building healthy habits!",
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )

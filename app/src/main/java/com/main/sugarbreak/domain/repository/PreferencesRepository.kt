@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.domain.repository
+package com.main.sugarbreak.domain.repository
 
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.domain.model.ReminderSettings
@@ -13,4 +13,6 @@ interface PreferencesRepository {
     suspend fun setOnboardingCompleted(completed: Boolean)
     fun getUserName(): Flow<String>
     suspend fun setUserName(name: String)
+    fun getQuotesEnabled(): Flow<Boolean>
+    suspend fun setQuotesEnabled(enabled: Boolean)
 }
