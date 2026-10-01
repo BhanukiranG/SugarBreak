@@ -172,7 +172,7 @@ fun CheckInScreen(
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
-                                text = "Safe & Non Judgmental Space",
+                                text = "Safe Space",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = primaryColor
                             )
@@ -193,7 +193,7 @@ fun CheckInScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Be honest with yourself—every log brings greater mindful awareness.",
+                        text = "Be honest.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -281,7 +281,7 @@ fun CheckInScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "No added sugar today! Feeling proud.",
+                                    text = "No added sugar today.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -364,7 +364,7 @@ fun CheckInScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Enjoyed some sugar. Learning and moving forward.",
+                                    text = "Enjoyed some sugar.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -386,14 +386,14 @@ fun CheckInScreen(
                                 .border(1.dp, if (isDark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.90f), RoundedCornerShape(20.dp))
                                 .padding(20.dp)
                         ) {
-                            // Section: What sweet treat did you enjoy?
+                            // Section: What did you enjoy?
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "What sweet treat did you enjoy?",
+                                    text = "What did you enjoy?",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -404,7 +404,7 @@ fun CheckInScreen(
                                 )
                             }
                             Text(
-                                text = "Naming what we taste without blame helps build dietary awareness.",
+                                text = "Naming helps.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
@@ -555,7 +555,7 @@ fun CheckInScreen(
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
-                                            text = "Acknowledge it, breathe, and trust your journey. Progress is built on self compassion, never deprivation.",
+                                            text = "Breathe and trust your journey.",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -669,9 +669,9 @@ fun CheckInScreen(
 
                             Text(
                                 text = if (uiState.isSuccess) {
-                                    "✨ Awesome job staying mindful today! Keep up the gentle momentum."
+                                    "✨ Awesome job today!"
                                 } else {
-                                    "✨ Logged! Compassion over perfection. See you tomorrow!"
+                                    "✨ Logged! See you tomorrow."
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

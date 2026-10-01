@@ -72,7 +72,7 @@ fun StatisticsScreen(
                                     color = if (isDark) Color.White else primaryColor
                                 )
                                 Text(
-                                    "Habit Progress & Trends",
+                                    "Progress & Trends",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -279,7 +279,7 @@ fun StatisticsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        "30 Day Sugar Reset",
+                                        "30 Day Reset",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -314,12 +314,12 @@ fun StatisticsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "${uiState.successfulDays} of 30 days completed",
+                                    "${uiState.successfulDays} of 30 days",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    "${(30 - uiState.successfulDays).coerceAtLeast(0)} days remaining",
+                                    "${(30 - uiState.successfulDays).coerceAtLeast(0)} days left",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -385,7 +385,7 @@ fun StatisticsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "${uiState.successfulDays} On Track Days",
+                                        text = "${uiState.successfulDays} On Track",
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -399,7 +399,7 @@ fun StatisticsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "${uiState.slipDays} Gentle Slips",
+                                        text = "${uiState.slipDays} Slips",
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

@@ -221,7 +221,7 @@ fun HomeScreen(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Day $currentStreak of your $targetDays day sugar free reset",
+                        text = "Day $currentStreak of $targetDays",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -385,7 +385,7 @@ fun HomeScreen(
                                     }
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Text(
-                                        text = "Great job staying mindful and building healthy habits!",
+                                        text = "Great job staying mindful!",
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                         color = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.weight(1f)
@@ -441,7 +441,7 @@ fun HomeScreen(
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        "You stayed on track. Keep up the gentle momentum and rest well tonight.",
+                                        "You stayed on track.",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

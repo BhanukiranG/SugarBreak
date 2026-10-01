@@ -232,7 +232,7 @@ fun SettingsScreen(
                                     iconTint = primaryColor,
                                     iconBg = primaryColor.copy(alpha = 0.12f),
                                     title = "Daily Check In Reminder",
-                                    subtitle = "Evening reflection prompt",
+                                    subtitle = "Evening nudge to log.",
                                     checked = uiState.reminderEnabled,
                                     onCheckedChange = { isChecked ->
                                         if (isChecked) {
@@ -587,7 +587,7 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
-                            text = "SugarBreak targets Added and Free Sugars to support healthy metabolic balance:",
+                            text = "SugarBreak targets added sugars.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -628,12 +628,12 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
-                            text = "“Awareness without shame, progress without perfection.”",
+                            text = "“Awareness without shame.”",
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = primaryColor
                         )
                         Text(
-                            text = "SugarBreak is built on a compassion first foundation. Slip ups are valuable data points, not failures. Every conscious decision to reset brings long term vitality.",
+                            text = "Slip ups are data points, not failures.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

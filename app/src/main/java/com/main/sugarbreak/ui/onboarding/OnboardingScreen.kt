@@ -362,7 +362,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "We like to keep things personal! What should we call you on your daily dashboard?",
+            text = "What should we call you?",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 24.sp
@@ -424,7 +424,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Welcome to your SugarBreak journey.",
+                        text = "Welcome to SugarBreak.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -450,7 +450,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Your profile is stored locally and securely on your device.",
+                    text = "Data stored locally.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -494,13 +494,13 @@ fun Step3Rule(
         Spacer(modifier = Modifier.height(14.dp))
 
         Text(
-            text = "Every journey is personal. What happens if you slip?",
+            text = "What happens on a slip?",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, lineHeight = 30.sp),
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Slip ups are a natural part of lasting habit change. Choose what feels most supportive for your mental peace.",
+            text = "Choose what happens when you slip.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 22.sp
@@ -508,9 +508,9 @@ fun Step3Rule(
         Spacer(modifier = Modifier.height(20.dp))
 
         val rules = listOf(
-            ChallengeBehavior.CONTINUE to ("Continue tracking normally" to "Forgive and keep going without breaking stride. Best for reducing guilt and fostering natural resilience."),
-            ChallengeBehavior.ADD_RECOVERY_DAY to ("Add a recovery day" to "Gives you an extra day to recenter before counting streaks. Pause without judgment."),
-            ChallengeBehavior.RESET_STREAK to ("Reset my streak" to "Start fresh with day 1. Best for strict reset rules and clean slate purists.")
+            ChallengeBehavior.CONTINUE to ("Continue tracking normally" to "Keep going without breaking."),
+            ChallengeBehavior.ADD_RECOVERY_DAY to ("Add a recovery day" to "Pause streak for a day."),
+            ChallengeBehavior.RESET_STREAK to ("Reset my streak" to "Reset to day 1.")
         )
 
         rules.forEach { (rule, texts) ->
@@ -695,7 +695,7 @@ fun Step4TargetDays(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Choose a milestone duration that motivates you. You can always extend or create a new challenge later.",
+            text = "Choose your milestone.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -784,7 +784,7 @@ fun Step5Reminder(hour: Int, minute: Int, onTimeSelected: (Int, Int) -> Unit) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Pick a consistent time in the evening to log your sugar intake peacefully.",
+            text = "Pick a time to log.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -888,7 +888,7 @@ fun Step5Reminder(hour: Int, minute: Int, onTimeSelected: (Int, Int) -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Tip: Choose a time 30 to 60 minutes before your usual bedtime for a calm, distraction free check in.",
+                    text = "Tip: 30-60 mins before bed.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp
@@ -1009,7 +1009,7 @@ fun Step6Summary(state: OnboardingState) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Review your plan below. You can change these preferences at any time in Settings.",
+            text = "Review your plan.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
