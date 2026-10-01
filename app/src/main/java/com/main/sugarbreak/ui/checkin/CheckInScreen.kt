@@ -510,7 +510,8 @@ fun CheckInScreen(
                                             style = MaterialTheme.typography.bodyMedium.copy(
                                                 fontWeight = if (isChosen) FontWeight.SemiBold else FontWeight.Normal
                                             ),
-                                            color = if (isChosen) primaryColor else MaterialTheme.colorScheme.onSurface
+                                            color = if (isChosen) primaryColor else MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.weight(1f)
                                         )
                                     }
                                 }
@@ -546,7 +547,7 @@ fun CheckInScreen(
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(10.dp))
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "Gentle Reminder",
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
@@ -704,7 +705,7 @@ fun CheckInScreen(
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(10.dp))
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "Awareness Score",
                                             style = MaterialTheme.typography.labelSmall,

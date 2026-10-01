@@ -11,7 +11,7 @@ import com.main.sugarbreak.data.local.entity.DailyCheckInEntity
 
 @Database(
     entities = [ChallengeEntity::class, DailyCheckInEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

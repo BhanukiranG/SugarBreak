@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -114,7 +115,7 @@ class SettingsViewModel @Inject constructor(
 
     fun updateChallengeGoal(targetDays: Int) {
         viewModelScope.launch {
-            val currentChallenge = getActiveChallengeUseCase().first()
+            val currentChallenge = getActiveChallengeUseCase().firstOrNull()
             if (currentChallenge != null) {
                 val updated = currentChallenge.copy(targetSuccessfulDays = targetDays)
                 challengeRepository.update(updated)

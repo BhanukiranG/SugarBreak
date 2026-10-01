@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.domain.usecase
+package com.main.sugarbreak.domain.usecase
 
 import com.main.sugarbreak.domain.model.Challenge
 import com.main.sugarbreak.domain.model.ChallengeBehavior
@@ -20,16 +20,21 @@ class RecordCheckInUseCase @Inject constructor(
         status: CheckInStatus,
         reason: SlipReason? = null
     ) {
+        val existing = checkInRepository.getCheckInForDate(challenge.id, LocalDate.now())
         val checkIn = DailyCheckIn(
-            id = 0,
+            id = existing?.id ?: 0,
             challengeId = challenge.id,
             date = LocalDate.now(),
             status = status,
             reason = reason,
-            createdAt = LocalDateTime.now(),
+            createdAt = existing?.createdAt ?: LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
         )
-        checkInRepository.insert(checkIn)
+        if (existing != null) {
+            checkInRepository.update(checkIn)
+        } else {
+            checkInRepository.insert(checkIn)
+        }
 
         val checkIns = checkInRepository.getAllCheckInsForChallengeSync(challenge.id)
         val successfulDays = checkIns.count { it.status == CheckInStatus.SUCCESS }

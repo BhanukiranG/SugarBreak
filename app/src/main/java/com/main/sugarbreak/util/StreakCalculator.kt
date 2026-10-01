@@ -1,12 +1,18 @@
-﻿package com.main.sugarbreak.util
+package com.main.sugarbreak.util
 
 import com.main.sugarbreak.domain.model.CheckInStatus
 import com.main.sugarbreak.domain.model.DailyCheckIn
 import com.main.sugarbreak.domain.model.StreakSummary
 import java.time.LocalDate
 
+import com.main.sugarbreak.domain.model.ChallengeBehavior
+
 object StreakCalculator {
-    fun calculate(checkIns: List<DailyCheckIn>, referenceDate: LocalDate = LocalDate.now()): StreakSummary {
+    fun calculate(
+        checkIns: List<DailyCheckIn>, 
+        referenceDate: LocalDate = LocalDate.now(),
+        challengeBehavior: ChallengeBehavior = ChallengeBehavior.RESET_STREAK
+    ): StreakSummary {
         val sortedCheckIns = checkIns.sortedBy { it.date }
         
         var currentStreak = 0
@@ -40,7 +46,23 @@ object StreakCalculator {
                         bestStreak = tempCurrent
                     }
                 }
-                CheckInStatus.SLIP, CheckInStatus.SKIPPED -> {
+                CheckInStatus.SLIP -> {
+                    when (challengeBehavior) {
+                        ChallengeBehavior.CONTINUE -> {
+                            tempCurrent++
+                            if (tempCurrent > bestStreak) {
+                                bestStreak = tempCurrent
+                            }
+                        }
+                        ChallengeBehavior.ADD_RECOVERY_DAY -> {
+                            // Pauses streak, doesn't increment or reset.
+                        }
+                        ChallengeBehavior.RESET_STREAK -> {
+                            tempCurrent = 0
+                        }
+                    }
+                }
+                CheckInStatus.SKIPPED -> {
                     tempCurrent = 0
                 }
                 CheckInStatus.PENDING -> {
@@ -66,11 +88,30 @@ object StreakCalculator {
         // Count consecutively backwards
         while (true) {
             val checkIn = checkInMap[dateCursor]
-            if (checkIn != null && checkIn.status == CheckInStatus.SUCCESS) {
-                currentStreak++
-                dateCursor = dateCursor.minusDays(1)
+            if (checkIn != null) {
+                if (checkIn.status == CheckInStatus.SUCCESS) {
+                    currentStreak++
+                    dateCursor = dateCursor.minusDays(1)
+                } else if (checkIn.status == CheckInStatus.SLIP) {
+                    when (challengeBehavior) {
+                        ChallengeBehavior.CONTINUE -> {
+                            currentStreak++
+                            dateCursor = dateCursor.minusDays(1)
+                        }
+                        ChallengeBehavior.ADD_RECOVERY_DAY -> {
+                            dateCursor = dateCursor.minusDays(1)
+                        }
+                        ChallengeBehavior.RESET_STREAK -> {
+                            break
+                        }
+                    }
+                } else if (checkIn.status == CheckInStatus.SKIPPED) {
+                    break
+                } else {
+                    break // PENDING
+                }
             } else {
-                break
+                break // Missing record breaks streak
             }
         }
 

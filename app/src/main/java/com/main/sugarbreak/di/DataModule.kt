@@ -24,7 +24,9 @@ object DataModule {
             context,
             SugarBreakDatabase::class.java,
             "sugarbreak_db"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     @Provides
