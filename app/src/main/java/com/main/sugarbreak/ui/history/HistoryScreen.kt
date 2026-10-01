@@ -234,6 +234,7 @@ fun HistoryScreen(
                     ) {
                         // Mint Chip: On Track
                         Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(50))
@@ -242,13 +243,7 @@ fun HistoryScreen(
                                 .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(primaryContainer)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
+
                                 Column {
                                     Text(
                                         text = "$successCount On Track",
@@ -266,6 +261,7 @@ fun HistoryScreen(
 
                         // Peach Chip: Gentle Slips
                         Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(50))
@@ -277,13 +273,7 @@ fun HistoryScreen(
                                 .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(tertiaryColor)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
+
                                 Column {
                                     Text(
                                         text = "$slipCount Gentle Slips",
@@ -301,6 +291,7 @@ fun HistoryScreen(
 
                         // Grey Chip: Rest Days
                         Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(50))
@@ -312,13 +303,7 @@ fun HistoryScreen(
                                 .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.outline)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
+
                                 Column {
                                     Text(
                                         text = "$restCount Rest Days",
