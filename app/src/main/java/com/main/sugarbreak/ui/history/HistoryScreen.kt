@@ -44,6 +44,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
+    onNavigateToUserDetails: () -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -102,12 +103,22 @@ fun HistoryScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        IconButton(onClick = onNavigateToUserDetails) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(primaryColor.copy(alpha = 0.15f))
+                                    .border(1.dp, primaryColor.copy(alpha = 0.3f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "User Profile",
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -121,7 +132,7 @@ fun HistoryScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
+                        .padding(top = paddingValues.calculateTopPadding()),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = primaryColor)
@@ -141,7 +152,7 @@ fun HistoryScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(top = paddingValues.calculateTopPadding())
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp)

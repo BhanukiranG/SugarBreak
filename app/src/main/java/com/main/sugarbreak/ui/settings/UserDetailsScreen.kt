@@ -234,18 +234,24 @@ fun UserDetailsScreen(
                 }
 
                 // Save Profile Button
+                val isSaveEnabled = name.isNotBlank()
                 Button(
                     onClick = {
-                        val finalName = if (name.isBlank()) "Local Profile" else name
-                        viewModel.updateUserName(finalName)
-                        onNavigateBack()
+                        if (isSaveEnabled) {
+                            viewModel.updateUserName(name)
+                            onNavigateBack()
+                        }
                     },
+                    enabled = isSaveEnabled,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp)
-                        .shadow(8.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.4f)),
+                        .shadow(if (isSaveEnabled) 8.dp else 0.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.4f)),
                     shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(containerColor = primaryContainer)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = primaryContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
                     Text(
                         "Save Profile",

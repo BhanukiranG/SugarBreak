@@ -126,8 +126,9 @@ fun OnboardingScreen(
 
                     Button(
                         onClick = {
-                            if (state.currentStep < 5) viewModel.nextStep() else viewModel.finishOnboarding()
+                            if (state.currentStep < 6) viewModel.nextStep() else viewModel.finishOnboarding()
                         },
+                        enabled = if (state.currentStep == 2) state.userName.isNotBlank() else true,
                         modifier = Modifier
                             .height(48.dp)
                             .weight(1f),
@@ -239,7 +240,7 @@ fun OnboardingScreen(
                 }
 
                 // Dynamic Step Content
-                Box(modifier = Modifier.weight(1f, fill = false)) {
+                Box(modifier = Modifier.fillMaxWidth()) {
                     when (state.currentStep) {
                         1 -> Step1Intro()
                         2 -> Step2Profile(state.userName, viewModel::setUserName)
@@ -250,7 +251,7 @@ fun OnboardingScreen(
                     }
                 }
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(88.dp))
             }
         }
     }
@@ -390,6 +391,48 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
         )
 
         Spacer(modifier = Modifier.height(20.dp))
+
+        // Live Greeting Preview Card
+        val displayName = if (name.isBlank()) "Friend" else name
+        GlassCard(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = primaryColor.copy(alpha = 0.15f),
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = primaryColor,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(14.dp))
+                Column {
+                    Text(
+                        text = "Hello, $displayName! ✨",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Welcome to your SugarBreak journey.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         GlassBox(
             shape = RoundedCornerShape(14.dp),
@@ -707,71 +750,249 @@ fun Step4TargetDays(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Step5Reminder(hour: Int, minute: Int, onTimeSelected: (Int, Int) -> Unit) {
+    val isDark = isSystemInDarkTheme()
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+    var permissionRequested by remember { mutableStateOf(false) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        permissionRequested = true
+    }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    var showTimePickerDialog by remember { mutableStateOf(false) }
+
+    val currentFormattedTime = remember(hour, minute) {
+        val localTime = java.time.LocalTime.of(hour, minute)
+        localTime.format(java.time.format.DateTimeFormatter.ofPattern("h:mm a", java.util.Locale.getDefault()))
+    }
+
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Text(
             text = "Daily Reminder",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.align(Alignment.Start)
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Pick a consistent time in the evening to log your sugar intake peacefully.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.align(Alignment.Start)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        var permissionRequested by remember { mutableStateOf(false) }
-        val permissionLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            permissionRequested = true
-        }
-
-        LaunchedEffect(Unit) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-
-        val timePickerState = rememberTimePickerState(initialHour = hour, initialMinute = minute)
-
+        // 1. Digital Time Hero Card (Clickable to open Time Dialog)
         GlassCard(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(22.dp),
             isElevated = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(22.dp))
+                .clickable { showTimePickerDialog = true }
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TimePicker(
-                    state = timePickerState,
-                    colors = TimePickerDefaults.colors(
-                        clockDialColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        selectorColor = primaryColor,
-                        periodSelectorBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        periodSelectorSelectedContainerColor = primaryColor.copy(alpha = 0.2f),
-                        periodSelectorSelectedContentColor = primaryColor,
-                        periodSelectorUnselectedContainerColor = Color.Transparent,
-                        periodSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        timeSelectorSelectedContainerColor = primaryColor.copy(alpha = 0.2f),
-                        timeSelectorSelectedContentColor = primaryColor,
-                        timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        shape = CircleShape,
+                        color = primaryColor.copy(alpha = 0.15f),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = primaryColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "SELECTED REMINDER TIME",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = currentFormattedTime,
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = (-1).sp
+                        ),
+                        color = primaryColor
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Reminder Time",
+                        tint = primaryColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = primaryColor.copy(alpha = if (isDark) 0.20f else 0.10f),
+                    border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.3f))
+                ) {
+                    Text(
+                        text = "Tap to change reminder time ⏱️",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = primaryColor,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 2. Gentle Recommendation Tip Card
+        GlassBox(
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null,
+                    tint = primaryColor,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "Tip: Choose a time 30–60 minutes before your usual bedtime for a calm, distraction-free check-in.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 18.sp
                 )
             }
         }
 
-        LaunchedEffect(timePickerState.hour, timePickerState.minute) {
-            onTimeSelected(timePickerState.hour, timePickerState.minute)
+        // Custom Time Picker Modal Dialog
+        if (showTimePickerDialog) {
+            val dialogTimePickerState = rememberTimePickerState(
+                initialHour = hour,
+                initialMinute = minute,
+                is24Hour = false
+            )
+            var isKeypadMode by remember { mutableStateOf(true) }
+
+            AlertDialog(
+                onDismissRequest = { showTimePickerDialog = false },
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                modifier = Modifier.fillMaxWidth(0.92f),
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.AccessTime,
+                                contentDescription = null,
+                                tint = primaryColor,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                "Select Custom Time",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+
+                        IconButton(onClick = { isKeypadMode = !isKeypadMode }) {
+                            Icon(
+                                imageVector = if (isKeypadMode) Icons.Default.Schedule else Icons.Default.Edit,
+                                contentDescription = if (isKeypadMode) "Switch to Clock Dial" else "Switch to Keyboard Input",
+                                tint = primaryColor
+                            )
+                        }
+                    }
+                },
+                text = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            if (isKeypadMode) {
+                                TimeInput(
+                                    state = dialogTimePickerState,
+                                    colors = TimePickerDefaults.colors(
+                                        timeSelectorSelectedContainerColor = primaryColor.copy(alpha = 0.2f),
+                                        timeSelectorSelectedContentColor = primaryColor,
+                                        timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface
+                                    )
+                                )
+                            } else {
+                                TimePicker(
+                                    state = dialogTimePickerState,
+                                    colors = TimePickerDefaults.colors(
+                                        clockDialColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        selectorColor = primaryColor,
+                                        periodSelectorSelectedContainerColor = primaryColor.copy(alpha = 0.2f),
+                                        periodSelectorSelectedContentColor = primaryColor,
+                                        timeSelectorSelectedContainerColor = primaryColor.copy(alpha = 0.2f),
+                                        timeSelectorSelectedContentColor = primaryColor
+                                    )
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onTimeSelected(dialogTimePickerState.hour, dialogTimePickerState.minute)
+                            showTimePickerDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text("Set Time", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { showTimePickerDialog = false },
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.outline)
+                    }
+                }
+            )
         }
     }
 }

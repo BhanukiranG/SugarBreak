@@ -1,8 +1,10 @@
 package com.main.sugarbreak.ui.settings
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -117,7 +119,7 @@ fun SettingsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
+                        .padding(top = paddingValues.calculateTopPadding()),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = primaryColor)
@@ -126,7 +128,7 @@ fun SettingsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(top = paddingValues.calculateTopPadding())
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp)
@@ -233,10 +235,23 @@ fun SettingsScreen(
                                     subtitle = "Evening reflection prompt",
                                     checked = uiState.reminderEnabled,
                                     onCheckedChange = { isChecked ->
-                                        if (isChecked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                        if (isChecked) {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                val hasPermission = ContextCompat.checkSelfPermission(
+                                                    context,
+                                                    Manifest.permission.POST_NOTIFICATIONS
+                                                ) == PackageManager.PERMISSION_GRANTED
+
+                                                if (hasPermission) {
+                                                    viewModel.toggleReminder(true)
+                                                } else {
+                                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                                }
+                                            } else {
+                                                viewModel.toggleReminder(true)
+                                            }
                                         } else {
-                                            viewModel.toggleReminder(isChecked)
+                                            viewModel.toggleReminder(false)
                                         }
                                     }
                                 )
@@ -246,25 +261,13 @@ fun SettingsScreen(
                                 val timeFormatted = remember(uiState.reminderTime) {
                                     uiState.reminderTime.format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
                                 }
-                                SettingsActionRow(
+                                 SettingsActionRow(
                                     icon = Icons.Default.Schedule,
                                     iconTint = MaterialTheme.colorScheme.secondary,
                                     iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
                                     title = "Reminder Time",
                                     badgeText = timeFormatted,
                                     onClick = { showTimePicker = true }
-                                )
-
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
-
-                                SettingsToggleRow(
-                                    icon = Icons.Default.FormatQuote,
-                                    iconTint = tertiaryColor,
-                                    iconBg = tertiaryColor.copy(alpha = 0.12f),
-                                    title = "Gentle Motivational Quotes",
-                                    subtitle = "Calm & compassion-first notes",
-                                    checked = uiState.quotesEnabled,
-                                    onCheckedChange = { viewModel.toggleQuotesEnabled(it) }
                                 )
                             }
                         }

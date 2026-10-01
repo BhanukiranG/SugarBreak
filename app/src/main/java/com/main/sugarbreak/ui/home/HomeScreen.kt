@@ -39,6 +39,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToHistory: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {},
+    onNavigateToUserDetails: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -49,7 +50,7 @@ fun HomeScreen(
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
 
     val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val nameString = if (state.userName != "Local Profile" && state.userName.isNotBlank()) ", ${state.userName}" else ""
+    val nameString = if (state.userName.isNotBlank() && state.userName != "Local Profile") ", ${state.userName}" else ", Friend"
     val greeting = when {
         currentHour < 12 -> "Good morning$nameString ✨"
         currentHour < 18 -> "Good afternoon$nameString ✨"
@@ -126,14 +127,15 @@ fun HomeScreen(
                             )
                         }
 
+                        // Profile Avatar Button
                         IconButton(
-                            onClick = onNavigateToSettings,
-                            modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                            onClick = onNavigateToUserDetails,
+                            modifier = Modifier.padding(start = 2.dp, end = 4.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "User Profile",
+                                tint = primaryColor
                             )
                         }
                     },
@@ -148,7 +150,7 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
+                        .padding(top = paddingValues.calculateTopPadding()),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = primaryColor)
@@ -157,7 +159,7 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(top = paddingValues.calculateTopPadding())
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -183,7 +185,7 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(top = paddingValues.calculateTopPadding())
                         .verticalScroll(scrollState)
                         .padding(horizontal = 20.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.Start

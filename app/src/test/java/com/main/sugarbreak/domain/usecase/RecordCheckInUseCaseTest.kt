@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.domain.usecase
+package com.main.sugarbreak.domain.usecase
 
 import com.main.sugarbreak.domain.model.Challenge
 import com.main.sugarbreak.domain.model.ChallengeBehavior
@@ -32,6 +32,10 @@ class RecordCheckInUseCaseTest {
 
         override suspend fun getAllCheckInsForChallengeSync(challengeId: Long): List<DailyCheckIn> {
             return checkIns.filter { it.challengeId == challengeId }
+        }
+
+        override suspend fun deleteAllCheckInsForChallenge(challengeId: Long) {
+            checkIns.removeAll { it.challengeId == challengeId }
         }
     }
 

@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.navigation
+package com.main.sugarbreak.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -71,6 +71,9 @@ fun AppNavGraph(
                     },
                     onNavigateToSettings = {
                         navController.navigate("settings")
+                    },
+                    onNavigateToUserDetails = {
+                        navController.navigate("userdetails")
                     }
                 )
             }
@@ -82,10 +85,18 @@ fun AppNavGraph(
                 )
             }
             composable("history") {
-                HistoryScreen()
+                HistoryScreen(
+                    onNavigateToUserDetails = {
+                        navController.navigate("userdetails")
+                    }
+                )
             }
             composable("statistics") {
-                StatisticsScreen()
+                StatisticsScreen(
+                    onNavigateToUserDetails = {
+                        navController.navigate("userdetails")
+                    }
+                )
             }
             composable("settings") {
                 SettingsScreen(

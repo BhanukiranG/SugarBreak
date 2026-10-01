@@ -31,7 +31,6 @@ data class SettingsUiState(
     val trackingRule: String = "Strict",
     val challengeBehavior: ChallengeBehavior = ChallengeBehavior.CONTINUE,
     val userName: String = "Local Profile",
-    val quotesEnabled: Boolean = true,
     val challengeGoalDays: Int = 30,
     val activeChallengeId: Long? = null,
     val isLoading: Boolean = true
@@ -56,10 +55,9 @@ class SettingsViewModel @Inject constructor(
                 preferencesRepository.getReminderSettings(),
                 preferencesRepository.getChallengeBehavior(),
                 preferencesRepository.getUserName(),
-                preferencesRepository.getQuotesEnabled(),
                 getActiveChallengeUseCase()
-            ) { reminderSettings, behavior, userName, quotes, challenge ->
-                SettingsTuple(reminderSettings, behavior, userName, quotes, challenge)
+            ) { reminderSettings, behavior, userName, challenge ->
+                SettingsTuple(reminderSettings, behavior, userName, challenge)
             }.collectLatest { tuple ->
                 _uiState.update { 
                     it.copy(
@@ -67,7 +65,6 @@ class SettingsViewModel @Inject constructor(
                         reminderTime = LocalTime.of(tuple.reminderSettings.hour, tuple.reminderSettings.minute),
                         challengeBehavior = tuple.behavior,
                         userName = tuple.userName,
-                        quotesEnabled = tuple.quotes,
                         challengeGoalDays = tuple.challenge?.targetSuccessfulDays ?: 30,
                         activeChallengeId = tuple.challenge?.id,
                         isLoading = false
@@ -112,12 +109,6 @@ class SettingsViewModel @Inject constructor(
     fun updateUserName(name: String) {
         viewModelScope.launch {
             preferencesRepository.setUserName(name)
-        }
-    }
-
-    fun toggleQuotesEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            preferencesRepository.setQuotesEnabled(enabled)
         }
     }
 
@@ -169,6 +160,5 @@ private data class SettingsTuple(
     val reminderSettings: ReminderSettings,
     val behavior: ChallengeBehavior,
     val userName: String,
-    val quotes: Boolean,
     val challenge: Challenge?
 )

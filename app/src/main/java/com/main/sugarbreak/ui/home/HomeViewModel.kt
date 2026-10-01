@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.home
+package com.main.sugarbreak.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,31 +35,32 @@ class HomeViewModel @Inject constructor(
         loadHomeData()
     }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private fun loadHomeData() {
         combine(
             getActiveChallengeUseCase(),
             preferencesRepository.getUserName()
         ) { challenge, userName ->
             Pair(challenge, userName)
-        }.onEach { (challenge, userName) ->
+        }.flatMapLatest { (challenge, userName) ->
             if (challenge != null) {
                 combine(
                     calculateStreakUseCase(challenge.id),
                     getTodayCheckInUseCase(challenge.id)
                 ) { streak, checkIn ->
-                    _state.update {
-                        it.copy(
-                            activeChallenge = challenge,
-                            streakSummary = streak,
-                            todayCheckIn = checkIn,
-                            userName = userName,
-                            isLoading = false
-                        )
-                    }
-                }.launchIn(viewModelScope)
+                    HomeState(
+                        activeChallenge = challenge,
+                        streakSummary = streak,
+                        todayCheckIn = checkIn,
+                        userName = userName,
+                        isLoading = false
+                    )
+                }
             } else {
-                _state.update { it.copy(activeChallenge = null, userName = userName, isLoading = false) }
+                flowOf(HomeState(activeChallenge = null, userName = userName, isLoading = false))
             }
+        }.onEach { newState ->
+            _state.value = newState
         }.launchIn(viewModelScope)
     }
 }

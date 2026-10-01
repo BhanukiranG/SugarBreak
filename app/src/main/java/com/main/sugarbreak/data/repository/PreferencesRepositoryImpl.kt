@@ -47,18 +47,10 @@ class PreferencesRepositoryImpl @Inject constructor(
     }
 
     override fun getUserName(): Flow<String> {
-        return preferencesManager.userName.map { it ?: "Local Profile" }
+        return preferencesManager.userName.map { if (it.isNullOrBlank() || it == "Local Profile") "Friend" else it }
     }
 
     override suspend fun setUserName(name: String) {
         preferencesManager.setUserName(name)
-    }
-
-    override fun getQuotesEnabled(): Flow<Boolean> {
-        return preferencesManager.quotesEnabled
-    }
-
-    override suspend fun setQuotesEnabled(enabled: Boolean) {
-        preferencesManager.setQuotesEnabled(enabled)
     }
 }

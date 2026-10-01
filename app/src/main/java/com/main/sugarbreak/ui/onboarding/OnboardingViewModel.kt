@@ -1,8 +1,9 @@
-﻿package com.main.sugarbreak.ui.onboarding
+package com.main.sugarbreak.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.sugarbreak.domain.model.ChallengeBehavior
+import com.main.sugarbreak.domain.model.ReminderSettings
 import com.main.sugarbreak.domain.repository.PreferencesRepository
 import com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
 import com.main.sugarbreak.domain.usecase.ScheduleReminderUseCase
@@ -73,11 +74,16 @@ class OnboardingViewModel @Inject constructor(
                 hour = currentState.reminderHour,
                 minute = currentState.reminderMinute
             )
+            preferencesRepository.updateReminderSettings(
+                ReminderSettings(
+                    enabled = true,
+                    hour = currentState.reminderHour,
+                    minute = currentState.reminderMinute
+                )
+            )
             preferencesRepository.setOnboardingCompleted(true)
             preferencesRepository.updateChallengeBehavior(currentState.selectedRule)
-            if (currentState.userName.isNotBlank()) {
-                preferencesRepository.setUserName(currentState.userName)
-            }
+            preferencesRepository.setUserName(currentState.userName)
             _state.update { it.copy(onboardingCompleted = true) }
         }
     }

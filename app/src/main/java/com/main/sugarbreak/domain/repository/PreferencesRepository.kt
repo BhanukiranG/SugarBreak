@@ -13,6 +13,4 @@ interface PreferencesRepository {
     suspend fun setOnboardingCompleted(completed: Boolean)
     fun getUserName(): Flow<String>
     suspend fun setUserName(name: String)
-    fun getQuotesEnabled(): Flow<Boolean>
-    suspend fun setQuotesEnabled(enabled: Boolean)
 }

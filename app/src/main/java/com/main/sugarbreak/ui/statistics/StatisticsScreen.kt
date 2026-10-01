@@ -27,6 +27,7 @@ import com.main.sugarbreak.ui.components.SugarBackground
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
+    onNavigateToUserDetails: () -> Unit = {},
     viewModel: StatisticsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -78,6 +79,25 @@ fun StatisticsScreen(
                             }
                         }
                     },
+                    actions = {
+                        IconButton(onClick = onNavigateToUserDetails) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(primaryColor.copy(alpha = 0.15f))
+                                    .border(1.dp, primaryColor.copy(alpha = 0.3f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "User Profile",
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = if (isDark) Color(0xFF0B0F17).copy(alpha = 0.85f)
                         else Color.White.copy(alpha = 0.82f)
@@ -89,7 +109,7 @@ fun StatisticsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
+                        .padding(top = paddingValues.calculateTopPadding()),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = primaryColor)
@@ -98,7 +118,7 @@ fun StatisticsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(top = paddingValues.calculateTopPadding())
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
