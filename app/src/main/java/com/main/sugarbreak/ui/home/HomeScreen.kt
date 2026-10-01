@@ -415,11 +415,7 @@ fun HomeScreen(
                                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
-                                        Text(
-                                            "Today",
-                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
