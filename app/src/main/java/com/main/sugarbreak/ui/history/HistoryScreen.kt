@@ -242,20 +242,19 @@ fun HistoryScreen(
                                 .border(1.dp, primaryContainer.copy(alpha = 0.35f), RoundedCornerShape(50))
                                 .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                                Column {
-                                    Text(
-                                        text = "$successCount On Track",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = primaryColor
-                                    )
-                                    Text(
-                                        text = "Mint days",
-                                        fontSize = 9.sp,
-                                        color = primaryColor.copy(alpha = 0.8f)
-                                    )
-                                }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "$successCount On Track",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = primaryColor,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = "Mint days",
+                                    fontSize = 9.sp,
+                                    color = primaryColor.copy(alpha = 0.8f),
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
 
@@ -272,20 +271,19 @@ fun HistoryScreen(
                                 .border(1.dp, tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(50))
                                 .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                                Column {
-                                    Text(
-                                        text = "$slipCount Gentle Slips",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = tertiaryColor
-                                    )
-                                    Text(
-                                        text = "Peach days",
-                                        fontSize = 9.sp,
-                                        color = tertiaryColor.copy(alpha = 0.8f)
-                                    )
-                                }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "$slipCount Gentle Slips",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = tertiaryColor,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = "Peach days",
+                                    fontSize = 9.sp,
+                                    color = tertiaryColor.copy(alpha = 0.8f),
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
 
@@ -302,20 +300,19 @@ fun HistoryScreen(
                                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(50))
                                 .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                                Column {
-                                    Text(
-                                        text = "$restCount Rest Days",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = "Grey days",
-                                        fontSize = 9.sp,
-                                        color = MaterialTheme.colorScheme.outline
-                                    )
-                                }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "$restCount Rest Days",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = "Grey days",
+                                    fontSize = 9.sp,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
                     }
