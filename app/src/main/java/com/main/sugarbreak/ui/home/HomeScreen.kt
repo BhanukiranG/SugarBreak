@@ -84,7 +84,7 @@ fun HomeScreen(
     val currentStreak = state.streakSummary?.currentStreak ?: 0
     val successfulDays = state.streakSummary?.successfulDays ?: 0
     val targetDays = state.activeChallenge?.targetSuccessfulDays ?: 30
-    val progressPercent = if (targetDays > 0) ((successfulDays.toFloat() / targetDays) * 100).toInt().coerceIn(0, 100) else 0
+    val progressPercent = if (targetDays > 0) ((currentStreak.toFloat() / targetDays) * 100).toInt().coerceIn(0, 100) else 0
 
     SugarBackground {
         Scaffold(
@@ -316,7 +316,7 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "$successfulDays / $targetDays successful days",
+                                    text = "$currentStreak / $targetDays days",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.weight(1f)
@@ -348,7 +348,7 @@ fun HomeScreen(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth(if (targetDays > 0) successfulDays.toFloat() / targetDays else 0f)
+                                        .fillMaxWidth(if (targetDays > 0) currentStreak.toFloat() / targetDays else 0f)
                                         .fillMaxHeight()
                                         .background(
                                             Brush.horizontalGradient(

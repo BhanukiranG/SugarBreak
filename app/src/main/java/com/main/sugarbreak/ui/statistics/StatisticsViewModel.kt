@@ -45,7 +45,7 @@ class StatisticsViewModel @Inject constructor(
                 if (challenge != null) {
                     calculateStreakUseCase(challenge.id).collectLatest { summary ->
                         val target = challenge.targetSuccessfulDays.toFloat()
-                        val progress = if (target > 0) (summary.successfulDays / target).coerceAtMost(1f) else 0f
+                        val progress = if (target > 0) (summary.currentStreak / target).coerceAtMost(1f) else 0f
                         
                         _uiState.update { 
                             it.copy(

@@ -307,7 +307,7 @@ fun StatisticsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        "30 Day Reset",
+                                        "${uiState.targetGoalDays} Day Challenge",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -342,12 +342,12 @@ fun StatisticsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "${uiState.successfulDays} of 30 days",
+                                    "${uiState.currentStreak} of ${uiState.targetGoalDays} days",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    "${(30 - uiState.successfulDays).coerceAtLeast(0)} days left",
+                                    "${(uiState.targetGoalDays - uiState.currentStreak).coerceAtLeast(0)} days left",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )

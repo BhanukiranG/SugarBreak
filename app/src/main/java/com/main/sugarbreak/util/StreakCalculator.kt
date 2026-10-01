@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.util
+package com.main.sugarbreak.util
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -24,6 +24,7 @@ object StreakCalculator {
         
         var tempCurrent = 0
         var lastDate: LocalDate? = null
+        var consecutiveSlips = 0
 
         for (checkIn in sortedCheckIns) {
             when (checkIn.status) {
@@ -38,17 +39,20 @@ object StreakCalculator {
                 if (daysBetween > 1L) {
                     // A missing day breaks the streak
                     tempCurrent = 0
+                    consecutiveSlips = 0
                 }
             }
 
             when (checkIn.status) {
                 CheckInStatus.SUCCESS -> {
+                    consecutiveSlips = 0
                     tempCurrent++
                     if (tempCurrent > bestStreak) {
                         bestStreak = tempCurrent
                     }
                 }
                 CheckInStatus.SLIP -> {
+                    consecutiveSlips++
                     when (challengeBehavior) {
                         ChallengeBehavior.CONTINUE -> {
                             tempCurrent++
@@ -57,7 +61,10 @@ object StreakCalculator {
                             }
                         }
                         ChallengeBehavior.ADD_RECOVERY_DAY -> {
-                            // Pauses streak, doesn't increment or reset.
+                            if (consecutiveSlips > 1) {
+                                tempCurrent = 0
+                            }
+                            // Else Pauses streak, doesn't increment or reset.
                         }
                         ChallengeBehavior.RESET_STREAK -> {
                             tempCurrent = 0
@@ -66,6 +73,7 @@ object StreakCalculator {
                 }
                 CheckInStatus.SKIPPED -> {
                     tempCurrent = 0
+                    consecutiveSlips = 0
                 }
                 CheckInStatus.PENDING -> {
                     // Pending does not add to streak or break it directly in the historical pass
@@ -88,20 +96,27 @@ object StreakCalculator {
         }
 
         // Count consecutively backwards
+        var consecutiveSlipsBackward = 0
         while (true) {
             val checkIn = checkInMap[dateCursor]
             if (checkIn != null) {
                 if (checkIn.status == CheckInStatus.SUCCESS) {
+                    consecutiveSlipsBackward = 0
                     currentStreak++
                     dateCursor = dateCursor.minusDays(1)
                 } else if (checkIn.status == CheckInStatus.SLIP) {
+                    consecutiveSlipsBackward++
                     when (challengeBehavior) {
                         ChallengeBehavior.CONTINUE -> {
                             currentStreak++
                             dateCursor = dateCursor.minusDays(1)
                         }
                         ChallengeBehavior.ADD_RECOVERY_DAY -> {
-                            dateCursor = dateCursor.minusDays(1)
+                            if (consecutiveSlipsBackward > 1) {
+                                break
+                            } else {
+                                dateCursor = dateCursor.minusDays(1)
+                            }
                         }
                         ChallengeBehavior.RESET_STREAK -> {
                             break
