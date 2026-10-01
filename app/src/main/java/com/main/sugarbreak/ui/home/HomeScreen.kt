@@ -202,7 +202,8 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = (-0.5).sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f).padding(end = 16.dp)
                         )
                         Box(
                             modifier = Modifier
@@ -311,8 +312,10 @@ fun HomeScreen(
                                 Text(
                                     text = "$successfulDays / $targetDays successful days",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "$progressPercent% complete",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
