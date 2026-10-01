@@ -231,7 +231,7 @@ fun SettingsScreen(
                                     icon = Icons.Default.Alarm,
                                     iconTint = primaryColor,
                                     iconBg = primaryColor.copy(alpha = 0.12f),
-                                    title = "Daily Check-In Reminder",
+                                    title = "Daily Check In Reminder",
                                     subtitle = "Evening reflection prompt",
                                     checked = uiState.reminderEnabled,
                                     onCheckedChange = { isChecked ->
@@ -299,8 +299,8 @@ fun SettingsScreen(
                                     icon = Icons.Default.Sync,
                                     iconTint = primaryColor,
                                     iconBg = primaryColor.copy(alpha = 0.12f),
-                                    title = "Rule on Slip-ups",
-                                    subtitle = "Non-punitive mindset",
+                                    title = "Rule on Slip ups",
+                                    subtitle = "Non punitive mindset",
                                     valueText = behaviorText,
                                     onClick = { showRuleDialog = true }
                                 )
@@ -351,8 +351,8 @@ fun SettingsScreen(
                                     icon = Icons.Default.Favorite,
                                     iconTint = primaryColor,
                                     iconBg = primaryColor.copy(alpha = 0.12f),
-                                    title = "Our Non-Judgmental Philosophy",
-                                    subtitle = "Guilt-free habits & awareness",
+                                    title = "Our Non Judgmental Philosophy",
+                                    subtitle = "Guilt free habits & awareness",
                                     onClick = { showPhilosophyDialog = true }
                                 )
 
@@ -451,7 +451,7 @@ fun SettingsScreen(
                 onDismissRequest = { showRuleDialog = false },
                 title = {
                     Text(
-                        "Rule on Slip-ups",
+                        "Rule on Slip ups",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 },
@@ -606,7 +606,7 @@ fun SettingsScreen(
             )
         }
 
-        // Non-Judgmental Philosophy Dialog
+        // Non Judgmental Philosophy Dialog
         if (showPhilosophyDialog) {
             AlertDialog(
                 onDismissRequest = { showPhilosophyDialog = false },
@@ -633,7 +633,7 @@ fun SettingsScreen(
                             color = primaryColor
                         )
                         Text(
-                            text = "SugarBreak is built on a compassion-first foundation. Slip-ups are valuable data points, not failures. Every conscious decision to reset brings long-term vitality.",
+                            text = "SugarBreak is built on a compassion first foundation. Slip ups are valuable data points, not failures. Every conscious decision to reset brings long term vitality.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -653,7 +653,7 @@ fun SettingsScreen(
                 onDismissRequest = { showResetDialog = false },
                 title = { Text("Reset All Data", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
                 text = {
-                    Text("Are you sure you want to reset your logs? This will clear past check-in records for a fresh start.")
+                    Text("Are you sure you want to reset your logs? This will clear past check in records for a fresh start.")
                 },
                 confirmButton = {
                     TextButton(

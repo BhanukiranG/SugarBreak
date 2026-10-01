@@ -220,7 +220,7 @@ fun HomeScreen(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Day $currentStreak of your $targetDays-day sugar-free reset",
+                        text = "Day $currentStreak of your $targetDays day sugar free reset",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -289,7 +289,7 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = "Days Sugar-Free",
+                                        text = "Days Sugar Free",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = primaryColor
                                     )

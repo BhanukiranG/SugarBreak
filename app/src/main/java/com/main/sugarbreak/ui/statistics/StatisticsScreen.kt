@@ -279,7 +279,7 @@ fun StatisticsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        "30-Day Sugar Reset",
+                                        "30 Day Sugar Reset",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )

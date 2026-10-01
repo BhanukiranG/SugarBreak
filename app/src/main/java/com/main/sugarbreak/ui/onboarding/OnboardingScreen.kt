@@ -271,7 +271,7 @@ fun Step1Intro() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "A supportive, science-informed habit tracker designed to help you reduce free sugar intake naturally — with zero guilt.",
+                text = "A supportive, science informed habit tracker designed to help you reduce free sugar intake naturally — with zero guilt.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 24.sp
@@ -288,7 +288,7 @@ fun Step1Intro() {
             ) {
                 IntroFeatureRow(
                     icon = Icons.Filled.Spa,
-                    title = "Non-Judgmental Tracking",
+                    title = "Non Judgmental Tracking",
                     desc = "Slips happen. Choose your own recovery rules and keep your momentum intact.",
                     iconTint = primaryColor
                 )
@@ -296,7 +296,7 @@ fun Step1Intro() {
                 IntroFeatureRow(
                     icon = Icons.Filled.Timer,
                     title = "Personalized Target",
-                    desc = "Set a 7, 21, 30, or 90-day challenge that fits your lifestyle and pace.",
+                    desc = "Set a 7, 21, 30, or 90 day challenge that fits your lifestyle and pace.",
                     iconTint = MaterialTheme.colorScheme.secondary
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
@@ -500,7 +500,7 @@ fun Step3Rule(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Slip-ups are a natural part of lasting habit change. Choose what feels most supportive for your mental peace.",
+            text = "Slip ups are a natural part of lasting habit change. Choose what feels most supportive for your mental peace.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 22.sp
@@ -509,7 +509,7 @@ fun Step3Rule(
 
         val rules = listOf(
             ChallengeBehavior.CONTINUE to ("Continue tracking normally" to "Forgive and keep going without breaking stride. Best for reducing guilt and fostering natural resilience."),
-            ChallengeBehavior.ADD_RECOVERY_DAY to ("Add a recovery day" to "Gives you an extra day to re-center before counting streaks. Pause without judgment."),
+            ChallengeBehavior.ADD_RECOVERY_DAY to ("Add a recovery day" to "Gives you an extra day to recenter before counting streaks. Pause without judgment."),
             ChallengeBehavior.RESET_STREAK to ("Reset my streak" to "Start fresh with day 1. Best for strict reset rules and clean slate purists.")
         )
 
@@ -888,7 +888,7 @@ fun Step5Reminder(hour: Int, minute: Int, onTimeSelected: (Int, Int) -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Tip: Choose a time 30–60 minutes before your usual bedtime for a calm, distraction-free check-in.",
+                    text = "Tip: Choose a time 30 to 60 minutes before your usual bedtime for a calm, distraction free check in.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp

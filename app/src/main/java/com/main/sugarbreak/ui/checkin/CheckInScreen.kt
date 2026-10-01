@@ -111,7 +111,7 @@ fun CheckInScreen(
 
                     // Screen Title
                     Text(
-                        text = "Daily Check-In",
+                        text = "Daily Check In",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -172,7 +172,7 @@ fun CheckInScreen(
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
-                                text = "Safe & Non-Judgmental Space",
+                                text = "Safe & Non Judgmental Space",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = primaryColor
                             )
@@ -554,7 +554,7 @@ fun CheckInScreen(
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
-                                            text = "Acknowledge it, breathe, and trust your journey. Progress is built on self-compassion, never deprivation.",
+                                            text = "Acknowledge it, breathe, and trust your journey. Progress is built on self compassion, never deprivation.",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -658,7 +658,7 @@ fun CheckInScreen(
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Text(
-                                text = "✨ Daily Check-In Saved",
+                                text = "✨ Daily Check In Saved",
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
