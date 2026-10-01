@@ -77,7 +77,7 @@ fun HomeScreen(
     val nameString = if (state.userName.isNotBlank() && state.userName != "Local Profile") ", ${state.userName}" else ", Friend"
     val greeting = when {
         currentHour < 12 -> "Good morning$nameString ✨"
-        currentHour < 17 -> "Good afternoon$nameString ✨"
+        currentHour < 16 -> "Good afternoon$nameString ✨"
         else -> "Good evening$nameString ✨"
     }
 
