@@ -1,13 +1,15 @@
-package com.main.sugarbreak.util
+﻿package com.main.sugarbreak.util
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.domain.model.CheckInStatus
 import com.main.sugarbreak.domain.model.DailyCheckIn
 import com.main.sugarbreak.domain.model.StreakSummary
 import java.time.LocalDate
 
-import com.main.sugarbreak.domain.model.ChallengeBehavior
-
 object StreakCalculator {
+    @RequiresApi(Build.VERSION_CODES.O)
     fun calculate(
         checkIns: List<DailyCheckIn>, 
         referenceDate: LocalDate = LocalDate.now(),

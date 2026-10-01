@@ -1,4 +1,4 @@
-package com.main.sugarbreak.ui.home
+﻿package com.main.sugarbreak.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,14 @@ import com.main.sugarbreak.domain.usecase.CalculateStreakUseCase
 import com.main.sugarbreak.domain.usecase.GetActiveChallengeUseCase
 import com.main.sugarbreak.domain.usecase.GetTodayCheckInUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 data class HomeState(

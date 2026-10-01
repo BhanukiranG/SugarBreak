@@ -11,9 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.main.sugarbreak.ui.theme.*
+import com.main.sugarbreak.ui.theme.ambientAmberDark
+import com.main.sugarbreak.ui.theme.ambientCyanDark
+import com.main.sugarbreak.ui.theme.ambientEmeraldDark
+import com.main.sugarbreak.ui.theme.ambientMintLight
+import com.main.sugarbreak.ui.theme.ambientPeachLight
+import com.main.sugarbreak.ui.theme.ambientSkyLight
 
 /**
  * Stitch Level 0 Canvas Atmosphere Wrapper.
