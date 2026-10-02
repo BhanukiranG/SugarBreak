@@ -26,12 +26,12 @@ class MainActivity : ComponentActivity() {
                 if (startDestination != null) {
                     AppNavGraph(
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = "splash",
-                        nextDestination = startDestination!!
+                        startDestination = startDestination!!
                     )
                 }
             }
         }
     }
 }
+
 
