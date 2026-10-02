@@ -58,7 +58,7 @@ fun AppBottomBar(
     onNavigateToRoute: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val primaryColor = MaterialTheme.colorScheme.primary
 
     val barBgColor = if (isDark) {
@@ -150,3 +150,4 @@ fun AppBottomBar(
         }
     }
 }
+

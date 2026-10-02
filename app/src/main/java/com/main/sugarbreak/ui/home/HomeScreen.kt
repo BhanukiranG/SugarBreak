@@ -61,7 +61,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
@@ -471,6 +471,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 
 

@@ -29,7 +29,7 @@ fun SugarBackground(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val bgColor = MaterialTheme.colorScheme.background
 
     Box(
@@ -91,3 +91,4 @@ fun SugarBackground(
         content()
     }
 }
+

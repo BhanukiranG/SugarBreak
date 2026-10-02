@@ -42,7 +42,7 @@ fun GlassCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
 
     val containerColor = backgroundColorOverride ?: if (isDark) {
         if (isElevated) glassElevatedBgDark else glassCardBgDark
@@ -95,7 +95,7 @@ fun GlassBox(
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
 
     val containerColor = backgroundColorOverride ?: if (isDark) {
         if (isElevated) Color(0xFF1A2738).copy(alpha = 0.92f)
@@ -142,7 +142,7 @@ fun GlassChip(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val primaryColor = MaterialTheme.colorScheme.primary
 
     val bg = if (selected) {
@@ -168,3 +168,4 @@ fun GlassChip(
         content = content
     )
 }
+

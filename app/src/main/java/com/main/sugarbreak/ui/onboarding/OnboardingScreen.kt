@@ -86,7 +86,7 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
 
     LaunchedEffect(state.onboardingCompleted) {
         if (state.onboardingCompleted) {
@@ -388,7 +388,7 @@ private fun IntroFeatureRow(
 
 @Composable
 fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val primaryColor = MaterialTheme.colorScheme.primary
 
     Column {
@@ -788,7 +788,7 @@ fun Step4TargetDays(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Step5Reminder(hour: Int, minute: Int, onTimeSelected: (Int, Int) -> Unit) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val primaryColor = MaterialTheme.colorScheme.primary
 
     var permissionRequested by remember { mutableStateOf(false) }
@@ -1098,5 +1098,6 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 

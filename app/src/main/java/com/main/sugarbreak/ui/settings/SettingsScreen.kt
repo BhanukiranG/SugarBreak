@@ -85,7 +85,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isDark = isSystemInDarkTheme()
+    val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val context = LocalContext.current
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -763,6 +763,7 @@ private fun SettingsActionRow(
         )
     }
 }
+
 
 
 
