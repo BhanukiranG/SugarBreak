@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.SugarBreak" parent="android:Theme.Material.Light.NoActionBar" />
+    
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background, animated icon, and animation duration. -->
+        <item name="windowSplashScreenBackground">#051410</item>
+        <!-- Use the full-bleed ic_launcher_foreground we already built -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <!-- Set the post-splash theme to your main theme -->
+        <item name="postSplashScreenTheme">@style/Theme.SugarBreak</item>
+    </style>
 </resources>
