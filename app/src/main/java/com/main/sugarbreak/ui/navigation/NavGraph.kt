@@ -18,12 +18,14 @@ import com.main.sugarbreak.ui.onboarding.OnboardingScreen
 import com.main.sugarbreak.ui.settings.SettingsScreen
 import com.main.sugarbreak.ui.settings.UserDetailsScreen
 import com.main.sugarbreak.ui.statistics.StatisticsScreen
+import com.main.sugarbreak.ui.splash.SplashScreen
 
 @Composable
 fun AppNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "home"
+    startDestination: String = "splash",
+    nextDestination: String = "home"
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -55,6 +57,15 @@ fun AppNavGraph(
             startDestination = startDestination,
             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         ) {
+            composable("splash") {
+                SplashScreen(
+                    onSplashFinished = {
+                        navController.navigate(nextDestination) {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable("onboarding") {
                 OnboardingScreen(
                     onFinish = {
@@ -115,3 +126,4 @@ fun AppNavGraph(
         }
     }
 }
+

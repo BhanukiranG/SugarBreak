@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak
+package com.main.sugarbreak
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,7 +24,8 @@ class MainActivity : ComponentActivity() {
                 if (startDestination != null) {
                     AppNavGraph(
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = startDestination!!
+                        startDestination = "splash",
+                        nextDestination = startDestination!!
                     )
                 }
             }
