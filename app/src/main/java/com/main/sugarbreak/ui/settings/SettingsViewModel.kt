@@ -165,3 +165,10 @@ private data class SettingsTuple(
     val userName: String,
     val challenge: Challenge?
 )
+
+    fun setIsDarkMode(isDark: Boolean?) {
+        viewModelScope.launch {
+            preferencesRepository.setIsDarkMode(isDark)
+        }
+    }
+

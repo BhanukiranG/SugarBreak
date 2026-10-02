@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak
+package com.main.sugarbreak
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +20,8 @@ class MainViewModel @Inject constructor(
     private val _startDestination = MutableStateFlow<String?>(null)
     val startDestination: StateFlow<String?> = _startDestination.asStateFlow()
 
+    val isDarkMode: StateFlow<Boolean?> = preferencesRepository.getIsDarkMode().stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), null)
+
     init {
         viewModelScope.launch {
             val isCompleted = preferencesRepository.getOnboardingCompleted().first()
@@ -26,3 +29,4 @@ class MainViewModel @Inject constructor(
         }
     }
 }
+

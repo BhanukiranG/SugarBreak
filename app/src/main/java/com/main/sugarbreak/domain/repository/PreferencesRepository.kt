@@ -13,4 +13,7 @@ interface PreferencesRepository {
     suspend fun setOnboardingCompleted(completed: Boolean)
     fun getUserName(): Flow<String>
     suspend fun setUserName(name: String)
+    fun getIsDarkMode(): Flow<Boolean?>
+    suspend fun setIsDarkMode(isDark: Boolean?)
 }
+

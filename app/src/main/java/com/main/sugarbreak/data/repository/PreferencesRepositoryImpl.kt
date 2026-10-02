@@ -53,4 +53,13 @@ class PreferencesRepositoryImpl @Inject constructor(
     override suspend fun setUserName(name: String) {
         preferencesManager.setUserName(name)
     }
+
+    override fun getIsDarkMode(): Flow<Boolean?> {
+        return preferencesManager.isDarkMode
+    }
+
+    override suspend fun setIsDarkMode(isDark: Boolean?) {
+        preferencesManager.setIsDarkMode(isDark)
+    }
 }
+

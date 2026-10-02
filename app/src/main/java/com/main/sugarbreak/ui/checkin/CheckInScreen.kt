@@ -665,6 +665,7 @@ fun CheckInScreen(
                 }
             }
 
+
             LaunchedEffect(uiState.isSubmitted) {
                 if (uiState.isSubmitted) {
                     onNavigateBack()

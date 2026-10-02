@@ -235,6 +235,37 @@ fun SettingsScreen(
                             }
                         }
                     }
+                    // Section: Appearance
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "APPEARANCE",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+
+                        GlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Column {
+                                SettingsToggleRow(
+                                    icon = Icons.Default.Nightlight,
+                                    iconTint = primaryColor,
+                                    iconBg = primaryColor.copy(alpha = 0.12f),
+                                    title = "Dark Mode",
+                                    subtitle = "Toggle dark theme across the app",
+                                    checked = uiState.isDarkMode ?: isDark,
+                                    onCheckedChange = { isChecked ->
+                                        viewModel.setIsDarkMode(isChecked)
+                                    }
+                                )
+                            }
+                        }
+                    }
 
                     // Section 1: Notifications & Reminders
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -385,23 +416,16 @@ fun SettingsScreen(
                             }
                         }
                     }
-
                     // App Version Footer
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                            .padding(vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "SugarBreak v2.4 — Designed with care 🌿",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "Build 142 • Calm vitality for healthy minds",
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "SugarBreak V1.0",
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
                     }
@@ -738,6 +762,9 @@ private fun SettingsActionRow(
         )
     }
 }
+
+
+
 
 
 
