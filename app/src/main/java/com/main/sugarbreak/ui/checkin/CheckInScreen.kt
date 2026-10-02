@@ -676,7 +676,8 @@ fun CheckInScreen(
                             .fillMaxWidth()
                             .padding(16.dp),
                         shape = RoundedCornerShape(24.dp),
-                        isElevated = true
+                        isElevated = true,
+                        backgroundColorOverride = MaterialTheme.colorScheme.surface
                     ) {
                         Column(
                             modifier = Modifier
@@ -782,3 +783,4 @@ fun CheckInScreen(
         }
     }
 }
+
