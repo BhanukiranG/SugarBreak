@@ -35,7 +35,8 @@ data class SettingsUiState(
     val userName: String = "Local Profile",
     val challengeGoalDays: Int = 30,
     val activeChallengeId: Long? = null,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val isDarkMode: Boolean? = null
 )
 
 @HiltViewModel
@@ -57,9 +58,10 @@ class SettingsViewModel @Inject constructor(
                 preferencesRepository.getReminderSettings(),
                 preferencesRepository.getChallengeBehavior(),
                 preferencesRepository.getUserName(),
-                getActiveChallengeUseCase()
-            ) { reminderSettings, behavior, userName, challenge ->
-                SettingsTuple(reminderSettings, behavior, userName, challenge)
+                getActiveChallengeUseCase(),
+                preferencesRepository.getIsDarkMode()
+            ) { reminderSettings, behavior, userName, challenge, isDark ->
+                SettingsTuple(reminderSettings, behavior, userName, challenge, isDark)
             }.collectLatest { tuple ->
                 _uiState.update { 
                     it.copy(
@@ -69,7 +71,8 @@ class SettingsViewModel @Inject constructor(
                         userName = tuple.userName,
                         challengeGoalDays = tuple.challenge?.targetSuccessfulDays ?: 30,
                         activeChallengeId = tuple.challenge?.id,
-                        isLoading = false
+                        isLoading = false,
+                        isDarkMode = tuple.isDarkMode
                     ) 
                 }
             }
@@ -157,18 +160,22 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
-}
-
-private data class SettingsTuple(
-    val reminderSettings: ReminderSettings,
-    val behavior: ChallengeBehavior,
-    val userName: String,
-    val challenge: Challenge?
-)
 
     fun setIsDarkMode(isDark: Boolean?) {
         viewModelScope.launch {
             preferencesRepository.setIsDarkMode(isDark)
         }
     }
+}
+
+private data class SettingsTuple(
+    val reminderSettings: ReminderSettings,
+    val behavior: ChallengeBehavior,
+    val userName: String,
+    val challenge: Challenge?,
+    val isDarkMode: Boolean?
+)
+
+
+
 

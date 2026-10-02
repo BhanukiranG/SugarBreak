@@ -54,11 +54,10 @@ class PreferencesManager(private val context: Context) {
     suspend fun setUserName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
     }
-}
 
     suspend fun setIsDarkMode(isDark: Boolean?) {
         context.dataStore.edit { preferences ->
             if (isDark == null) preferences.remove(IS_DARK_MODE) else preferences[IS_DARK_MODE] = isDark
         }
     }
-
+}
