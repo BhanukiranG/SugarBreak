@@ -1,7 +1,5 @@
 package com.main.sugarbreak.ui.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -21,7 +19,6 @@ import com.main.sugarbreak.ui.settings.SettingsScreen
 import com.main.sugarbreak.ui.settings.UserDetailsScreen
 import com.main.sugarbreak.ui.statistics.StatisticsScreen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavGraph(
     modifier: Modifier = Modifier,
@@ -118,8 +115,3 @@ fun AppNavGraph(
         }
     }
 }
-
-
-
-
-
