@@ -94,8 +94,6 @@ fun SettingsScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     var showRuleDialog by remember { mutableStateOf(false) }
     var showGoalDialog by remember { mutableStateOf(false) }
-    var showExcludedSugarsDialog by remember { mutableStateOf(false) }
-    var showPhilosophyDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -343,17 +341,6 @@ fun SettingsScreen(
                                     valueText = "${uiState.challengeGoalDays} Days Challenge",
                                     onClick = { showGoalDialog = true }
                                 )
-
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
-
-                                SettingsActionRow(
-                                    icon = Icons.Default.Egg,
-                                    iconTint = tertiaryColor,
-                                    iconBg = tertiaryColor.copy(alpha = 0.12f),
-                                    title = "Excluded Sugars",
-                                    valueText = "Added/Free sugars only",
-                                    onClick = { showExcludedSugarsDialog = true }
-                                )
                             }
                         }
                     }
@@ -375,16 +362,6 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column {
-                                SettingsActionRow(
-                                    icon = Icons.Default.Favorite,
-                                    iconTint = primaryColor,
-                                    iconBg = primaryColor.copy(alpha = 0.12f),
-                                    title = "Our Non Judgmental Philosophy",
-                                    subtitle = "Guilt free habits & awareness",
-                                    onClick = { showPhilosophyDialog = true }
-                                )
-
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
 
                                 SettingsActionRow(
                                     icon = Icons.Default.Download,
@@ -593,88 +570,6 @@ fun SettingsScreen(
             )
         }
 
-        // Excluded Sugars Info Dialog
-        if (showExcludedSugarsDialog) {
-            AlertDialog(
-                onDismissRequest = { showExcludedSugarsDialog = false },
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Egg,
-                            contentDescription = null,
-                            tint = tertiaryColor,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Excluded Sugars Guidelines",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            text = "SugarBreak targets added sugars.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "• Avoided: Table sugar, syrups, soda, packaged desserts, candy, and sweetened snacks.\n• Allowed: Naturally occurring sugars in whole fresh fruits and plain dairy products.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showExcludedSugarsDialog = false }) {
-                        Text("Got it", fontWeight = FontWeight.Bold, color = primaryColor)
-                    }
-                }
-            )
-        }
-
-        // Non Judgmental Philosophy Dialog
-        if (showPhilosophyDialog) {
-            AlertDialog(
-                onDismissRequest = { showPhilosophyDialog = false },
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = primaryColor,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Our Mindful Philosophy",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            text = "“Awareness without shame.”",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = primaryColor
-                        )
-                        Text(
-                            text = "Slip ups are data points, not failures.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showPhilosophyDialog = false }) {
-                        Text("Understand", fontWeight = FontWeight.Bold, color = primaryColor)
-                    }
-                }
-            )
-        }
-
         // Reset Data Confirmation Dialog
         if (showResetDialog) {
             AlertDialog(
@@ -843,6 +738,7 @@ private fun SettingsActionRow(
         )
     }
 }
+
 
 
 
