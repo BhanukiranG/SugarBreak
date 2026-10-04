@@ -964,9 +964,12 @@ fun Step6Summary(state: OnboardingState) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                 SummaryRow(label = "Target", value = "${state.targetDays} days", highlight = true)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
-                SummaryRow(label = "Rule on slip", value = state.selectedRule.name.replace("_", " "))
+                val rawRuleName = state.selectedRule.name.replace("_", " ").lowercase()
+                val ruleValue = rawRuleName.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+                SummaryRow(label = "Rule on slip", value = ruleValue)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
-                val timeString = "${state.reminderHour.toString().padStart(2, '0')}:${state.reminderMinute.toString().padStart(2, '0')}"
+                val timeFormatter = java.time.format.DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.US)
+                val timeString = java.time.LocalTime.of(state.reminderHour, state.reminderMinute).format(timeFormatter)
                 SummaryRow(label = "Daily Reminder", value = timeString)
             }
         }
@@ -996,6 +999,7 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 
 
