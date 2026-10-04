@@ -1,4 +1,4 @@
-package com.main.sugarbreak.ui.home
+﻿package com.main.sugarbreak.ui.home
 
 import com.main.sugarbreak.R
 
@@ -69,9 +69,9 @@ fun HomeScreen(
     val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val nameString = if (state.userName.isNotBlank() && state.userName != "Local Profile") ", ${state.userName}" else ", Friend"
     val greeting = when {
-        currentHour < 12 -> "Good morning$nameString ✨"
-        currentHour < 16 -> "Good afternoon$nameString ✨"
-        else -> "Good evening$nameString ✨"
+        currentHour < 12 -> "Good morning$nameString!"
+        currentHour < 16 -> "Good afternoon$nameString!"
+        else -> "Good evening$nameString!"
     }
 
     val currentStreak = state.streakSummary?.currentStreak ?: 0
@@ -459,6 +459,8 @@ fun HomeScreen(
         }
     }
 }
+
+
 
 
 
