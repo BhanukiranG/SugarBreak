@@ -1,4 +1,4 @@
-package com.main.sugarbreak.ui.settings
+﻿package com.main.sugarbreak.ui.settings
 
 import android.content.Context
 import android.content.Intent
@@ -166,7 +166,8 @@ class SettingsViewModel @Inject constructor(
                         val statusEmoji = when(record.status) {
                             com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS -> "? On Track"
                             com.main.sugarbreak.domain.model.CheckInStatus.SLIP -> "?? Slip"
-                            com.main.sugarbreak.domain.model.CheckInStatus.SKIPPED -> "? Rest Day"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SKIPPED -> "⚪ Rest Day"
+                            com.main.sugarbreak.domain.model.CheckInStatus.PENDING -> "⏳ Pending"
                         }
                         val reasonStr = if (record.reason != null && record.status == com.main.sugarbreak.domain.model.CheckInStatus.SLIP) {
                             val rName = record.reason.name.replace("_", " ")
@@ -204,6 +205,8 @@ private data class SettingsTuple(
     val challenge: Challenge?,
     val isDarkMode: Boolean?
 )
+
+
 
 
 
