@@ -268,7 +268,7 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = "Days Sugar Free",
+                                        text = "Day Streak",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = primaryColor
                                     )
@@ -459,6 +459,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 
 
