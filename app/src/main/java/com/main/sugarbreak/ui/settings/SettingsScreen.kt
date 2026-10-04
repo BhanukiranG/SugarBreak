@@ -213,19 +213,7 @@ fun SettingsScreen(
                                         color = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.weight(1f).padding(end = 8.dp)
                                     )
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(50))
-                                            .background(primaryColor.copy(alpha = 0.12f))
-                                            .border(1.dp, primaryColor.copy(alpha = 0.3f), RoundedCornerShape(50))
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = "Active Member",
-                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                            color = primaryColor
-                                        )
-                                    }
+
                                 }
 
                                 Text(
@@ -763,6 +751,7 @@ private fun SettingsActionRow(
         )
     }
 }
+
 
 
 
