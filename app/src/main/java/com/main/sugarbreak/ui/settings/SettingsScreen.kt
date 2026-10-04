@@ -127,15 +127,7 @@ fun SettingsScreen(
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = { showTimePicker = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Reminder Settings",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
+                    
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = if (isDark) Color(0xFF0B0F17).copy(alpha = 0.85f)
                         else Color.White.copy(alpha = 0.82f)
@@ -215,12 +207,6 @@ fun SettingsScreen(
                                     )
 
                                 }
-
-                                Text(
-                                    text = "Mindful Tracker",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
                     }
@@ -751,6 +737,7 @@ private fun SettingsActionRow(
         )
     }
 }
+
 
 
 
