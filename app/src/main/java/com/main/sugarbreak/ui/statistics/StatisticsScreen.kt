@@ -168,12 +168,12 @@ fun StatisticsScreen(
 
                     // 1. Core Hero Metrics (3 Minimal Cards Row)
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Max),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         // Current Streak Card
                         GlassCard(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column(
@@ -205,7 +205,7 @@ fun StatisticsScreen(
                         // Consistency Rate Card
                         val ratePercent = (uiState.successRate * 100).toInt()
                         GlassCard(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column(
@@ -236,7 +236,7 @@ fun StatisticsScreen(
 
                         // Target Goal Card
                         GlassCard(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column(
