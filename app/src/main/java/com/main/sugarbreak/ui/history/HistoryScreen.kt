@@ -276,11 +276,7 @@ fun HistoryScreen(
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = primaryColor,
                                     textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    text = "Mint days",
-                                    fontSize = 9.sp,
-                                    color = primaryColor.copy(alpha = 0.8f),
+                                ),
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -305,11 +301,7 @@ fun HistoryScreen(
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = tertiaryColor,
                                     textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    text = "Peach days",
-                                    fontSize = 9.sp,
-                                    color = tertiaryColor.copy(alpha = 0.8f),
+                                ),
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -333,12 +325,6 @@ fun HistoryScreen(
                                     text = "$restCount Rest Days",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    text = "Grey days",
-                                    fontSize = 9.sp,
-                                    color = MaterialTheme.colorScheme.outline,
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -550,6 +536,7 @@ fun HistoryScreen(
         }
     }
 }
+
 
 
 
