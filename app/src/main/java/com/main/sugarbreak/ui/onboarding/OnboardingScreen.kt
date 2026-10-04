@@ -45,7 +45,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -281,7 +285,7 @@ fun OnboardingScreen(
                     when (state.currentStep) {
                         1 -> Step1Intro()
                         2 -> Step2Profile(state.userName, viewModel::setUserName)
-                        3 -> Step3Rule(state.selectedRule, viewModel::setRule, state.targetDays, state.reminderHour, state.reminderMinute)
+                        3 -> Step3Rule(state.selectedRule, viewModel::setRule)
                         4 -> Step4TargetDays(state.targetDays, viewModel::setTargetDays)
                         5 -> Step5Reminder(state.reminderHour, state.reminderMinute, viewModel::setReminderTime)
                         6 -> Step6Summary(state)
@@ -308,7 +312,7 @@ fun Step1Intro() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "A supportive, science informed habit tracker designed to help you reduce free sugar intake naturally — with zero guilt.",
+                text = "A supportive, science informed habit tracker designed to help you reduce free sugar intake naturally with zero guilt.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 24.sp
@@ -414,6 +418,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = primaryColor,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
@@ -499,10 +504,8 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
 @Composable
 fun Step3Rule(
     selectedRule: ChallengeBehavior,
-    onRuleSelected: (ChallengeBehavior) -> Unit,
-    targetDays: Int,
-    reminderHour: Int,
-    reminderMinute: Int
+    onRuleSelected: (ChallengeBehavior) -> Unit
+    
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -635,88 +638,7 @@ fun Step3Rule(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Target Preview Chip with semantic tokens
-        GlassBox(
-            shape = RoundedCornerShape(50),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(26.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Flag,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(5.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Selected Goal",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Text(
-                    text = "Target: $targetDays Days",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = primaryColor
-                )
-            }
-        }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Reminder Preview Card with semantic tokens
-        GlassCard(
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier.padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Schedule,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(7.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    val timeString = "${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}"
-                    Row {
-                        Text("Daily reminder at ", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(timeString, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
-                    }
-                    Text("(Configured in next step)", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
-                }
-                Icon(
-                    imageVector = Icons.Outlined.LockOpen,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
     }
 }
 
@@ -1098,6 +1020,7 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 
 
