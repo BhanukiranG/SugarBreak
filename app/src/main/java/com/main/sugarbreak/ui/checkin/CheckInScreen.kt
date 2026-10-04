@@ -249,7 +249,7 @@ fun CheckInScreen(
                     val isHadSugar = uiState.hasHadSugar == true
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Max),
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         // Choice 1: Stayed on Track
@@ -263,6 +263,7 @@ fun CheckInScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
+                                .fillMaxHeight()
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(trackBg)
                                 .border(if (isStayedOnTrack) 2.dp else 1.dp, trackBorder, RoundedCornerShape(20.dp))
@@ -343,6 +344,7 @@ fun CheckInScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
+                                .fillMaxHeight()
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(sugarBg)
                                 .border(if (isHadSugar) 2.dp else 1.dp, sugarBorder, RoundedCornerShape(20.dp))
@@ -675,6 +677,7 @@ fun CheckInScreen(
         }
     }
 }
+
 
 
 
