@@ -200,32 +200,6 @@ fun CheckInScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 8.dp)
                 ) {
-                    // Mindfulness Hook Tag
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(primaryColor.copy(alpha = if (isDark) 0.20f else 0.10f))
-                            .border(1.dp, primaryColor.copy(alpha = if (isDark) 0.35f else 0.20f), RoundedCornerShape(50))
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Spa,
-                                contentDescription = null,
-                                tint = primaryColor,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = "Safe Space",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                color = primaryColor
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
                     Text(
                         text = "How was today?",
                         style = MaterialTheme.typography.headlineLarge.copy(
