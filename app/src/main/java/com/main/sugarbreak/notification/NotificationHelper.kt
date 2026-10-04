@@ -27,8 +27,8 @@ class NotificationHelper @Inject constructor(
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "SugarBreak Check-in"
-            val descriptionText = "Daily reminder to log your sugar intake in SugarBreak"
+            val name = "Sugar Break Check-in"
+            val descriptionText = "Daily reminder to log your sugar intake in Sugar Break"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
@@ -52,7 +52,7 @@ class NotificationHelper @Inject constructor(
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("SugarBreak Check-in")
+            .setContentTitle("Sugar Break Check-in")
             .setContentText("It's time to log your sugar intake for today!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
@@ -62,3 +62,4 @@ class NotificationHelper @Inject constructor(
         notificationManager.notify(NOTIFICATION_ID, builder.build())
     }
 }
+

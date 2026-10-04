@@ -94,7 +94,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                "SugarBreak",
+                                "Sugar Break",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = (-0.5).sp
@@ -459,6 +459,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 
 

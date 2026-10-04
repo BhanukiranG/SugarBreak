@@ -151,7 +151,7 @@ class SettingsViewModel @Inject constructor(
                 }
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "SugarBreak Tracking Data")
+                    putExtra(Intent.EXTRA_SUBJECT, "Sugar Break Tracking Data")
                     putExtra(Intent.EXTRA_TEXT, csvBuilder.toString())
                 }
                 val chooser = Intent.createChooser(intent, "Export Tracking Data")
@@ -175,6 +175,7 @@ private data class SettingsTuple(
     val challenge: Challenge?,
     val isDarkMode: Boolean?
 )
+
 
 
 

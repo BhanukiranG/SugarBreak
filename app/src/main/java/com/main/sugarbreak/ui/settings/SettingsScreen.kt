@@ -413,7 +413,7 @@ fun SettingsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "SugarBreak V1.0",
+                            text = "Sugar Break V1.0",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -751,6 +751,7 @@ private fun SettingsActionRow(
         )
     }
 }
+
 
 
 

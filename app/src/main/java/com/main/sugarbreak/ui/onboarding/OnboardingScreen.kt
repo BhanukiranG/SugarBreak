@@ -111,7 +111,7 @@ fun OnboardingScreen(
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
-                            text = "SugarBreak",
+                            text = "Sugar Break",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = primaryColor
                         )
@@ -302,7 +302,7 @@ fun Step1Intro() {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column {
             Text(
-                text = "Welcome to SugarBreak",
+                text = "Welcome to Sugar Break",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -461,7 +461,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Welcome to SugarBreak.",
+                        text = "Welcome to Sugar Break.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1098,6 +1098,7 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 
 
