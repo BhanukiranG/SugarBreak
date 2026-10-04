@@ -1,4 +1,4 @@
-package com.main.sugarbreak.ui.onboarding
+﻿package com.main.sugarbreak.ui.onboarding
 
 import com.main.sugarbreak.R
 
@@ -459,7 +459,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
                 Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
-                        text = "Hello, $displayName! ✨",
+                        text = "Hello, $displayName!",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -996,6 +996,7 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 
 
