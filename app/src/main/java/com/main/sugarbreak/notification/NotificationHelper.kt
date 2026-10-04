@@ -17,7 +17,7 @@ class NotificationHelper @Inject constructor(
 ) {
 
     companion object {
-        const val CHANNEL_ID = "sugar_check_in_channel"
+        const val CHANNEL_ID = "sugar_check_in_channel_high_priority"
         const val NOTIFICATION_ID = 1001
     }
 
@@ -29,7 +29,7 @@ class NotificationHelper @Inject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Sugar Break Check-in"
             val descriptionText = "Daily reminder to log your sugar intake in Sugar Break"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
@@ -54,7 +54,8 @@ class NotificationHelper @Inject constructor(
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("Sugar Break Check-in")
             .setContentText("It's time to log your sugar intake for today!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
@@ -62,4 +63,6 @@ class NotificationHelper @Inject constructor(
         notificationManager.notify(NOTIFICATION_ID, builder.build())
     }
 }
+
+
 
