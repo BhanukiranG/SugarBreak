@@ -276,8 +276,6 @@ fun HistoryScreen(
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = primaryColor,
                                     textAlign = TextAlign.Center
-                                ),
-                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
@@ -300,8 +298,6 @@ fun HistoryScreen(
                                     text = "$slipCount Gentle Slips",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = tertiaryColor,
-                                    textAlign = TextAlign.Center
-                                ),
                                     textAlign = TextAlign.Center
                                 )
                             }
