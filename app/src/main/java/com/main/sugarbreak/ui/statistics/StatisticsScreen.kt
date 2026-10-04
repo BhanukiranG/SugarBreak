@@ -77,7 +77,7 @@ fun StatisticsScreen(
                             androidx.compose.foundation.Image(
                                 painter = androidx.compose.ui.res.painterResource(id = com.main.sugarbreak.R.drawable.logo_app),
                                 contentDescription = "App Logo",
-                                modifier = Modifier.size(36.dp).clip(CircleShape),
+                                modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)),
                                 contentScale = androidx.compose.ui.layout.ContentScale.Crop
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -426,6 +426,7 @@ fun StatisticsScreen(
         }
     }
 }
+
 
 
 

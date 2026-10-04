@@ -116,7 +116,7 @@ fun HistoryScreen(
                             Image(
                                 painter = painterResource(id = R.drawable.logo_app),
                                 contentDescription = "App Logo",
-                                modifier = Modifier.size(36.dp).clip(CircleShape),
+                                modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)),
                                 contentScale = ContentScale.Crop
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -550,6 +550,7 @@ fun HistoryScreen(
         }
     }
 }
+
 
 
 
