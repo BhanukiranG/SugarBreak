@@ -647,7 +647,7 @@ fun CheckInScreen(
                             ),
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = primaryContainer,
+                            containerColor = primaryColor,
                             disabledContainerColor = if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
                         )
                     ) {
@@ -677,6 +677,7 @@ fun CheckInScreen(
         }
     }
 }
+
 
 
 

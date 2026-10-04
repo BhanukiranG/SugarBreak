@@ -435,7 +435,7 @@ fun HomeScreen(
                                     spotColor = primaryColor.copy(alpha = 0.45f)
                                 ),
                             shape = RoundedCornerShape(50),
-                            colors = ButtonDefaults.buttonColors(containerColor = primaryContainer)
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.TaskAlt,
@@ -459,6 +459,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 
 
