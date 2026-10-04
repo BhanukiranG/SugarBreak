@@ -147,15 +147,15 @@ class SettingsViewModel @Inject constructor(
                 val goalDays = _uiState.value.challengeGoalDays
                 
                 val builder = StringBuilder()
-                builder.append("?? *Sugar Break Progress* ??\n\n")
-                builder.append("?? *Name:* $userName\n")
-                builder.append("?? *Challenge:* $goalDays Days\n")
+                builder.append("🌟 *Sugar Break Progress* 🌟\n\n")
+                builder.append("👤 *Name:* $userName\n")
+                builder.append("🎯 *Challenge:* $goalDays Days\n")
                 
                 val successCount = records.count { it.status == com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS }
                 val consistency = if (records.isNotEmpty()) (successCount * 100) / records.size else 0
-                builder.append("?? *Consistency:* $consistency%\n\n")
+                builder.append("📊 *Consistency:* $consistency%\n\n")
                 
-                builder.append("?? *Check-in History:*\n")
+                builder.append("📅 *Check-in History:*\n")
                 
                 val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd")
                 if (records.isEmpty()) {
@@ -164,8 +164,8 @@ class SettingsViewModel @Inject constructor(
                     records.forEach { record ->
                         val dateStr = record.date.format(formatter)
                         val statusEmoji = when(record.status) {
-                            com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS -> "? On Track"
-                            com.main.sugarbreak.domain.model.CheckInStatus.SLIP -> "?? Slip"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS -> "✅ On Track"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SLIP -> "🟠 Slip"
                             com.main.sugarbreak.domain.model.CheckInStatus.SKIPPED -> "⚪ Rest Day"
                             com.main.sugarbreak.domain.model.CheckInStatus.PENDING -> "⏳ Pending"
                         }
