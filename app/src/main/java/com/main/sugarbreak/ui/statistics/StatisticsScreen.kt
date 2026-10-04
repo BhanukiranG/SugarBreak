@@ -74,37 +74,21 @@ fun StatisticsScreen(
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(primaryColor.copy(alpha = if (isDark) 0.20f else 0.12f))
-                                    .border(1.dp, primaryColor.copy(alpha = if (isDark) 0.35f else 0.20f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Analytics,
-                                    contentDescription = null,
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = com.main.sugarbreak.R.mipmap.ic_launcher_foreground),
+                                contentDescription = "App Logo",
+                                modifier = Modifier.size(36.dp).clip(CircleShape),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
                             Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    "Insights",
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = (-0.3).sp
-                                    ),
-                                    color = if (isDark) Color.White else primaryColor
-                                )
-                                Text(
-                                    "Progress & Trends",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            Text(
+                                "Insights",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = (-0.5).sp
+                                ),
+                                color = if (isDark) Color.White else primaryColor
+                            )
                         }
                     },
                     actions = {
@@ -442,4 +426,5 @@ fun StatisticsScreen(
         }
     }
 }
+
 

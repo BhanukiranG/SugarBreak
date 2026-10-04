@@ -121,7 +121,7 @@ fun HistoryScreen(
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                "SugarBreak",
+                                "History",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = (-0.5).sp
@@ -550,6 +550,7 @@ fun HistoryScreen(
         }
     }
 }
+
 
 
 
