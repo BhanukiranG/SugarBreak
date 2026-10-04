@@ -310,7 +310,7 @@ fun Step1Intro() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "A supportive, science informed habit tracker designed to help you reduce free sugar intake naturally with zero guilt.",
+                text = "A minimal, supportive habit tracker designed to help you reduce sugar intake naturally — with zero guilt.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 24.sp
@@ -334,15 +334,15 @@ fun Step1Intro() {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                 IntroFeatureRow(
                     icon = Icons.Filled.Timer,
-                    title = "Personalized Target",
-                    desc = "Set a 7, 21, 30, or 90 day challenge that fits your lifestyle and pace.",
+                    title = "Flexible Challenges",
+                    desc = "Set a 7 to 90-day challenge that fits your lifestyle and pace.",
                     iconTint = MaterialTheme.colorScheme.secondary
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                 IntroFeatureRow(
                     icon = Icons.Filled.NotificationsActive,
-                    title = "Gentle Daily Reminders",
-                    desc = "Timely daily notifications to pause, reflect, and check in peacefully.",
+                    title = "Gentle Reminders",
+                    desc = "Daily check-in notifications to help you pause, reflect, and stay mindful.",
                     iconTint = MaterialTheme.colorScheme.tertiary
                 )
             }
@@ -1018,6 +1018,7 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 
 
