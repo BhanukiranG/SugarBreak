@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.util
+package com.main.sugarbreak.util
 
 import com.main.sugarbreak.domain.model.Challenge
 import com.main.sugarbreak.domain.model.ChallengeBehavior
@@ -165,5 +165,55 @@ class StreakCalculatorTest {
         // Scenario C: User is in timezone where today is 10/7 (they missed 10/6)
         val summaryC = StreakCalculator.calculate(checkIns, LocalDate.of(2023, 10, 7))
         assertEquals(0, summaryC.currentStreak) // Streak broken!
+    }
+
+    @Test
+    fun 	est behavior CONTINUE - slip increments streak() {
+        val today = LocalDate.now()
+        val checkIns = listOf(
+            createCheckIn(today.minusDays(2), CheckInStatus.SUCCESS),
+            createCheckIn(today.minusDays(1), CheckInStatus.SLIP),
+            createCheckIn(today, CheckInStatus.SUCCESS)
+        )
+        val summary = StreakCalculator.calculate(checkIns, today, ChallengeBehavior.CONTINUE)
+        assertEquals(3, summary.currentStreak) // Slip counts as streak
+        assertEquals(3, summary.bestStreak)
+    }
+
+    @Test
+    fun 	est behavior ADD_RECOVERY_DAY - single slip pauses streak() {
+        val today = LocalDate.now()
+        val checkIns = listOf(
+            createCheckIn(today.minusDays(2), CheckInStatus.SUCCESS),
+            createCheckIn(today.minusDays(1), CheckInStatus.SLIP),
+            createCheckIn(today, CheckInStatus.SUCCESS)
+        )
+        val summary = StreakCalculator.calculate(checkIns, today, ChallengeBehavior.ADD_RECOVERY_DAY)
+        assertEquals(2, summary.currentStreak) // 1 (day -2) + 1 (today). Slip doesn't increment or reset.
+    }
+
+    @Test
+    fun 	est behavior ADD_RECOVERY_DAY - consecutive slips reset streak() {
+        val today = LocalDate.now()
+        val checkIns = listOf(
+            createCheckIn(today.minusDays(3), CheckInStatus.SUCCESS),
+            createCheckIn(today.minusDays(2), CheckInStatus.SLIP),
+            createCheckIn(today.minusDays(1), CheckInStatus.SLIP), // 2nd slip in a row!
+            createCheckIn(today, CheckInStatus.SUCCESS)
+        )
+        val summary = StreakCalculator.calculate(checkIns, today, ChallengeBehavior.ADD_RECOVERY_DAY)
+        assertEquals(1, summary.currentStreak) // Only today counts. The two slips reset it.
+    }
+
+    @Test
+    fun 	est behavior RESET_STREAK - single slip resets streak() {
+        val today = LocalDate.now()
+        val checkIns = listOf(
+            createCheckIn(today.minusDays(2), CheckInStatus.SUCCESS),
+            createCheckIn(today.minusDays(1), CheckInStatus.SLIP),
+            createCheckIn(today, CheckInStatus.SUCCESS)
+        )
+        val summary = StreakCalculator.calculate(checkIns, today, ChallengeBehavior.RESET_STREAK)
+        assertEquals(1, summary.currentStreak) // Only today counts, because yesterday reset it.
     }
 }

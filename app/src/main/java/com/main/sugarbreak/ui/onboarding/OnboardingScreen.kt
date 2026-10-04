@@ -508,28 +508,6 @@ fun Step3Rule(
     val primaryColor = MaterialTheme.colorScheme.primary
 
     Column {
-        GlassBox(shape = RoundedCornerShape(50)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = primaryColor,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Gentle & Sustainable",
-                    color = primaryColor,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         Text(
             text = "What happens on a slip?",
