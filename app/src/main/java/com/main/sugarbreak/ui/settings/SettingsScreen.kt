@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
@@ -451,122 +452,86 @@ fun SettingsScreen(
 
         // Challenge Behavior Rule Selection Dialog
         if (showRuleDialog) {
-            AlertDialog(
+            androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showRuleDialog = false },
-                title = {
-                    Text(
-                        "Rule on Slip ups",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ChallengeBehavior.entries.forEach { behavior ->
-                            val isSelected = uiState.challengeBehavior == behavior
-                            val label = when (behavior) {
-                                ChallengeBehavior.CONTINUE -> "Continue tracking normally (Recommended)"
-                                ChallengeBehavior.ADD_RECOVERY_DAY -> "Add recovery day"
-                                ChallengeBehavior.RESET_STREAK -> "Reset streak"
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(
-                                        if (isSelected) primaryColor.copy(alpha = 0.12f)
-                                        else Color.Transparent
-                                    )
-                                    .clickable {
-                                        viewModel.updateChallengeBehavior(behavior)
-                                        showRuleDialog = false
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                SugarBackground {
+                    Scaffold(
+                        containerColor = Color.Transparent,
+                        topBar = {
+                            TopAppBar(
+                                title = { },
+                                navigationIcon = {
+                                    IconButton(onClick = { showRuleDialog = false }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                                     }
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = isSelected,
-                                    onClick = {
-                                        viewModel.updateChallengeBehavior(behavior)
-                                        showRuleDialog = false
-                                    },
-                                    colors = RadioButtonDefaults.colors(selectedColor = primaryColor)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    ),
-                                    color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                            )
+                        }
+                    ) { paddingValues ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 24.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Spacer(Modifier.height(16.dp))
+                            com.main.sugarbreak.ui.onboarding.Step3Rule(
+                                selectedRule = uiState.challengeBehavior,
+                                onRuleSelected = { 
+                                    viewModel.updateChallengeBehavior(it)
+                                    showRuleDialog = false 
+                                }
+                            )
                         }
                     }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showRuleDialog = false }) {
-                        Text("Close", color = primaryColor)
-                    }
                 }
-            )
+            }
         }
 
         // Challenge Goal Selection Dialog
         if (showGoalDialog) {
-            val goals = listOf(7, 14, 21, 30, 60)
-            AlertDialog(
+            androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showGoalDialog = false },
-                title = {
-                    Text(
-                        "Select Challenge Goal",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        goals.forEach { targetDays ->
-                            val isSelected = uiState.challengeGoalDays == targetDays
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(
-                                        if (isSelected) primaryColor.copy(alpha = 0.12f)
-                                        else Color.Transparent
-                                    )
-                                    .clickable {
-                                        viewModel.updateChallengeGoal(targetDays)
-                                        showGoalDialog = false
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                SugarBackground {
+                    Scaffold(
+                        containerColor = Color.Transparent,
+                        topBar = {
+                            TopAppBar(
+                                title = { },
+                                navigationIcon = {
+                                    IconButton(onClick = { showGoalDialog = false }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                                     }
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = isSelected,
-                                    onClick = {
-                                        viewModel.updateChallengeGoal(targetDays)
-                                        showGoalDialog = false
-                                    },
-                                    colors = RadioButtonDefaults.colors(selectedColor = primaryColor)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "$targetDays Days Challenge",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    ),
-                                    color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                            )
+                        }
+                    ) { paddingValues ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 24.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Spacer(Modifier.height(16.dp))
+                            com.main.sugarbreak.ui.onboarding.Step4TargetDays(
+                                selectedDays = uiState.challengeGoalDays,
+                                onDaysSelected = { 
+                                    viewModel.updateChallengeGoal(it)
+                                    showGoalDialog = false 
+                                }
+                            )
                         }
                     }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showGoalDialog = false }) {
-                        Text("Close", color = primaryColor)
-                    }
                 }
-            )
+            }
         }
 
         // Reset Data Confirmation Dialog
@@ -737,6 +702,8 @@ private fun SettingsActionRow(
         )
     }
 }
+
+
 
 
 
