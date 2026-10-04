@@ -310,7 +310,7 @@ fun Step1Intro() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "A minimal, supportive habit tracker designed to help you reduce sugar intake naturally — with zero guilt.",
+                text = "A minimal, supportive habit tracker designed to help you reduce sugar intake naturally with zero guilt.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 24.sp
@@ -1018,6 +1018,9 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
+
+
 
 
 
