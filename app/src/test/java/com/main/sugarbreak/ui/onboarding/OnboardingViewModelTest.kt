@@ -32,6 +32,12 @@ class OnboardingViewModelTest {
         var challengeBehavior = ChallengeBehavior.CONTINUE
         var onboardingCompleted = false
         var userName = ""
+        var isDarkMode: Boolean? = null
+        override fun getIsDarkMode(): Flow<Boolean?> = flowOf(isDarkMode)
+        override suspend fun setIsDarkMode(isDark: Boolean?) {
+            isDarkMode = isDark
+        }
+
 
         override fun getReminderSettings(): Flow<ReminderSettings> = flowOf(reminderSettings)
 
