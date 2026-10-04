@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
@@ -371,10 +372,10 @@ fun SettingsScreen(
                             Column {
 
                                 SettingsActionRow(
-                                    icon = Icons.Default.Download,
+                                    icon = Icons.Default.Share,
                                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     iconBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                                    title = "Export Tracking Data (CSV)",
+                                    title = "Share Progress Report",
                                     onClick = { viewModel.exportDataCsv(context) }
                                 )
 
@@ -702,6 +703,8 @@ private fun SettingsActionRow(
         )
     }
 }
+
+
 
 
 

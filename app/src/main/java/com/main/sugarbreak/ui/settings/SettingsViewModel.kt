@@ -142,19 +142,48 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val activeChallengeId = _uiState.value.activeChallengeId
             if (activeChallengeId != null) {
-                val records = checkInRepository.getAllCheckInsForChallengeSync(activeChallengeId)
-                val csvBuilder = StringBuilder()
-                csvBuilder.append("Date,Status,Reason\n")
-                records.forEach { record ->
-                    val reasonText = record.reason?.name ?: "None"
-                    csvBuilder.append("${record.date},${record.status},$reasonText\n")
+                val records = checkInRepository.getAllCheckInsForChallengeSync(activeChallengeId).sortedBy { it.date }
+                val userName = _uiState.value.userName
+                val goalDays = _uiState.value.challengeGoalDays
+                
+                val builder = StringBuilder()
+                builder.append("?? *Sugar Break Progress* ??\n\n")
+                builder.append("?? *Name:* $userName\n")
+                builder.append("?? *Challenge:* $goalDays Days\n")
+                
+                val successCount = records.count { it.status == com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS }
+                val consistency = if (records.isNotEmpty()) (successCount * 100) / records.size else 0
+                builder.append("?? *Consistency:* $consistency%\n\n")
+                
+                builder.append("?? *Check-in History:*\n")
+                
+                val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd")
+                if (records.isEmpty()) {
+                    builder.append("No days tracked yet.\n")
+                } else {
+                    records.forEach { record ->
+                        val dateStr = record.date.format(formatter)
+                        val statusEmoji = when(record.status) {
+                            com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS -> "? On Track"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SLIP -> "?? Slip"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SKIPPED -> "? Rest Day"
+                        }
+                        val reasonStr = if (record.reason != null && record.status == com.main.sugarbreak.domain.model.CheckInStatus.SLIP) {
+                            val rName = record.reason.name.replace("_", " ")
+                            val formattedReason = rName.substring(0, 1).toUpperCase() + rName.substring(1).toLowerCase()
+                            " ($formattedReason)"
+                        } else ""
+                        
+                        builder.append("$statusEmoji  |  $dateStr$reasonStr\n")
+                    }
                 }
+                
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "Sugar Break Tracking Data")
-                    putExtra(Intent.EXTRA_TEXT, csvBuilder.toString())
+                    putExtra(Intent.EXTRA_SUBJECT, "My Sugar Break Progress")
+                    putExtra(Intent.EXTRA_TEXT, builder.toString())
                 }
-                val chooser = Intent.createChooser(intent, "Export Tracking Data")
+                val chooser = Intent.createChooser(intent, "Share Progress")
                 chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(chooser)
             }
@@ -175,6 +204,7 @@ private data class SettingsTuple(
     val challenge: Challenge?,
     val isDarkMode: Boolean?
 )
+
 
 
 
