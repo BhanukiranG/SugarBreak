@@ -75,7 +75,7 @@ fun StatisticsScreen(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             androidx.compose.foundation.Image(
-                                painter = androidx.compose.ui.res.painterResource(id = com.main.sugarbreak.R.mipmap.ic_launcher_foreground),
+                                painter = androidx.compose.ui.res.painterResource(id = com.main.sugarbreak.R.drawable.logo_app),
                                 contentDescription = "App Logo",
                                 modifier = Modifier.size(36.dp).clip(CircleShape),
                                 contentScale = androidx.compose.ui.layout.ContentScale.Crop
@@ -426,5 +426,6 @@ fun StatisticsScreen(
         }
     }
 }
+
 
 

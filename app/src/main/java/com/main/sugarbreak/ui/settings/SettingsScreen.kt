@@ -111,7 +111,7 @@ fun SettingsScreen(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                                painter = painterResource(id = R.drawable.logo_app),
                                 contentDescription = "App Logo",
                                 modifier = Modifier.size(36.dp).clip(CircleShape),
                                 contentScale = ContentScale.Crop
@@ -751,6 +751,7 @@ private fun SettingsActionRow(
         )
     }
 }
+
 
 
 
