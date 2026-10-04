@@ -168,7 +168,7 @@ class StreakCalculatorTest {
     }
 
     @Test
-    fun 	est behavior CONTINUE - slip increments streak() {
+    fun testBehaviorContinue() {
         val today = LocalDate.now()
         val checkIns = listOf(
             createCheckIn(today.minusDays(2), CheckInStatus.SUCCESS),
@@ -181,7 +181,7 @@ class StreakCalculatorTest {
     }
 
     @Test
-    fun 	est behavior ADD_RECOVERY_DAY - single slip pauses streak() {
+    fun testBehaviorAddRecoveryDaySingleSlip() {
         val today = LocalDate.now()
         val checkIns = listOf(
             createCheckIn(today.minusDays(2), CheckInStatus.SUCCESS),
@@ -193,7 +193,7 @@ class StreakCalculatorTest {
     }
 
     @Test
-    fun 	est behavior ADD_RECOVERY_DAY - consecutive slips reset streak() {
+    fun testBehaviorAddRecoveryDayConsecutiveSlips() {
         val today = LocalDate.now()
         val checkIns = listOf(
             createCheckIn(today.minusDays(3), CheckInStatus.SUCCESS),
@@ -206,7 +206,7 @@ class StreakCalculatorTest {
     }
 
     @Test
-    fun 	est behavior RESET_STREAK - single slip resets streak() {
+    fun testBehaviorResetStreak() {
         val today = LocalDate.now()
         val checkIns = listOf(
             createCheckIn(today.minusDays(2), CheckInStatus.SUCCESS),
