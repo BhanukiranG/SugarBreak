@@ -213,19 +213,7 @@ fun HomeScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f).padding(end = 16.dp)
                         )
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(primaryColor.copy(alpha = if (isDark) 0.20f else 0.12f))
-                                .border(1.dp, primaryColor.copy(alpha = if (isDark) 0.35f else 0.25f), RoundedCornerShape(50))
-                                .padding(horizontal = 10.dp, vertical = 3.dp)
-                        ) {
-                            Text(
-                                text = "Active",
-                                color = primaryColor,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                        }
+
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -471,6 +459,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 
 
