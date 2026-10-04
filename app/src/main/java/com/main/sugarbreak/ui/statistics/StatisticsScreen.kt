@@ -203,7 +203,7 @@ fun StatisticsScreen(
                         }
 
                         // Consistency Rate Card
-                        val ratePercent = if (uiState.successRate > 0f) (uiState.successRate * 100).toInt() else 88
+                        val ratePercent = (uiState.successRate * 100).toInt()
                         GlassCard(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(18.dp)
@@ -426,6 +426,7 @@ fun StatisticsScreen(
         }
     }
 }
+
 
 
 
