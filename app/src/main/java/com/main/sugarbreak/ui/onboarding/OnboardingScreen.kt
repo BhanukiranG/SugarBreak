@@ -48,8 +48,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -216,7 +214,7 @@ fun OnboardingScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                        .padding(bottom = 18.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1020,6 +1018,7 @@ fun SummaryRow(label: String, value: String, highlight: Boolean = false) {
         )
     }
 }
+
 
 
 
