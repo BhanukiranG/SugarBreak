@@ -85,9 +85,11 @@ val LocalIsDarkTheme = compositionLocalOf { false }
 @Composable
 fun SugarBreakTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    appTheme: com.main.sugarbreak.domain.model.AppTheme = com.main.sugarbreak.domain.model.AppTheme.MINT,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val defaultColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = getColorSchemeForTheme(appTheme, darkTheme) ?: defaultColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -108,3 +110,5 @@ fun SugarBreakTheme(
         )
     }
 }
+
+

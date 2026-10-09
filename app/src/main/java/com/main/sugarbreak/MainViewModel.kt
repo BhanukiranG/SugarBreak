@@ -21,6 +21,7 @@ class MainViewModel @Inject constructor(
     val startDestination: StateFlow<String?> = _startDestination.asStateFlow()
 
     val isDarkMode: StateFlow<Boolean?> = preferencesRepository.getIsDarkMode().stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), null)
+    val appTheme: StateFlow<com.main.sugarbreak.domain.model.AppTheme> = preferencesRepository.getAppTheme().stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), com.main.sugarbreak.domain.model.AppTheme.MINT)
 
     init {
         viewModelScope.launch {

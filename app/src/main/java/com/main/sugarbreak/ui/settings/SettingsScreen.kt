@@ -98,6 +98,7 @@ fun SettingsScreen(
     var showRuleDialog by remember { mutableStateOf(false) }
     var showGoalDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
+    var showThemeDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -239,6 +240,17 @@ fun SettingsScreen(
                                     onCheckedChange = { isChecked ->
                                         viewModel.setIsDarkMode(isChecked)
                                     }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                SettingsActionRow(
+                                    icon = Icons.Default.Favorite,
+                                    iconTint = primaryColor,
+                                    iconBg = primaryColor.copy(alpha = 0.12f),
+                                    title = "App Theme",
+                                    valueText = uiState.appTheme.displayName,
+                                    onClick = { showThemeDialog = true }
                                 )
                             }
                         }
@@ -562,6 +574,45 @@ fun SettingsScreen(
                 }
             )
         }
+
+        if (showThemeDialog) {
+            AlertDialog(
+                onDismissRequest = { showThemeDialog = false },
+                title = { Text("Select Theme", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column {
+                        com.main.sugarbreak.domain.model.AppTheme.values().forEach { theme ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { 
+                                        viewModel.setAppTheme(theme)
+                                        showThemeDialog = false
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = uiState.appTheme == theme,
+                                    onClick = { 
+                                        viewModel.setAppTheme(theme)
+                                        showThemeDialog = false
+                                    },
+                                    colors = RadioButtonDefaults.colors(selectedColor = primaryColor)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(theme.displayName, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showThemeDialog = false }) {
+                        Text("Close", color = primaryColor)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -703,6 +754,9 @@ private fun SettingsActionRow(
         )
     }
 }
+
+
+
 
 
 
