@@ -69,41 +69,41 @@ val LavenderDarkColorScheme = darkColorScheme(
     surfaceVariant = Color(0xFF4A204E), onSurfaceVariant = Color(0xFFFFD6F9), surfaceContainer = Color(0xFF4A204E)
 )
 
-// SUNSET
-private val sunPrimaryLight = Color(0xFF9E4200)
-private val sunOnPrimaryLight = Color(0xFFFFFFFF)
-private val sunPrimaryContainerLight = Color(0xFFFFDBCB)
-private val sunOnPrimaryContainerLight = Color(0xFF341100)
-private val sunSecondaryLight = Color(0xFF775749)
-private val sunOnSecondaryLight = Color(0xFFFFFFFF)
-private val sunSecondaryContainerLight = Color(0xFFFFDBCB)
-private val sunOnSecondaryContainerLight = Color(0xFF2C160B)
+// ROSE
+private val rosePrimaryLight = Color(0xFFE11D48)
+private val roseOnPrimaryLight = Color(0xFFFFFFFF)
+private val rosePrimaryContainerLight = Color(0xFFFFE4E6)
+private val roseOnPrimaryContainerLight = Color(0xFF4C0519)
+private val roseSecondaryLight = Color(0xFFBE123C)
+private val roseOnSecondaryLight = Color(0xFFFFFFFF)
+private val roseSecondaryContainerLight = Color(0xFFFECDD3)
+private val roseOnSecondaryContainerLight = Color(0xFF4C0519)
 
-private val sunPrimaryDark = Color(0xFFFFB692)
-private val sunOnPrimaryDark = Color(0xFF552000)
-private val sunPrimaryContainerDark = Color(0xFF793100)
-private val sunOnPrimaryContainerDark = Color(0xFFFFDBCB)
-private val sunSecondaryDark = Color(0xFFE7BDAA)
-private val sunOnSecondaryDark = Color(0xFF442A1E)
-private val sunSecondaryContainerDark = Color(0xFF5D4033)
-private val sunOnSecondaryContainerDark = Color(0xFFFFDBCB)
+private val rosePrimaryDark = Color(0xFFFDA4AF)
+private val roseOnPrimaryDark = Color(0xFF4C0519)
+private val rosePrimaryContainerDark = Color(0xFF9F1239)
+private val roseOnPrimaryContainerDark = Color(0xFFFFE4E6)
+private val roseSecondaryDark = Color(0xFFFB7185)
+private val roseOnSecondaryDark = Color(0xFF4C0519)
+private val roseSecondaryContainerDark = Color(0xFF881337)
+private val roseOnSecondaryContainerDark = Color(0xFFFECDD3)
 
-val SunsetLightColorScheme = lightColorScheme(
-    primary = sunPrimaryLight, onPrimary = sunOnPrimaryLight, primaryContainer = sunPrimaryContainerLight, onPrimaryContainer = sunOnPrimaryContainerLight,
-    secondary = sunSecondaryLight, onSecondary = sunOnSecondaryLight, secondaryContainer = sunSecondaryContainerLight, onSecondaryContainer = sunOnSecondaryContainerLight,
-    background = Color(0xFFFFF8F6), onBackground = Color(0xFF341100), surface = Color(0xFFFFF8F6), onSurface = Color(0xFF341100),
-    surfaceVariant = Color(0xFFFBECE6), onSurfaceVariant = Color(0xFF52443F), surfaceContainer = Color(0xFFFBECE6)
+val RoseLightColorScheme = lightColorScheme(
+    primary = rosePrimaryLight, onPrimary = roseOnPrimaryLight, primaryContainer = rosePrimaryContainerLight, onPrimaryContainer = roseOnPrimaryContainerLight,
+    secondary = roseSecondaryLight, onSecondary = roseOnSecondaryLight, secondaryContainer = roseSecondaryContainerLight, onSecondaryContainer = roseOnSecondaryContainerLight,
+    background = Color(0xFFFFF1F2), onBackground = Color(0xFF4C0519), surface = Color(0xFFFFF1F2), onSurface = Color(0xFF4C0519),
+    surfaceVariant = Color(0xFFFFE4E6), onSurfaceVariant = Color(0xFF881337), surfaceContainer = Color(0xFFFFE4E6)
 )
-val SunsetDarkColorScheme = darkColorScheme(
-    primary = sunPrimaryDark, onPrimary = sunOnPrimaryDark, primaryContainer = sunPrimaryContainerDark, onPrimaryContainer = sunOnPrimaryContainerDark,
-    secondary = sunSecondaryDark, onSecondary = sunOnSecondaryDark, secondaryContainer = sunSecondaryContainerDark, onSecondaryContainer = sunOnSecondaryContainerDark,
-    background = Color(0xFF341100), onBackground = Color(0xFFFFDBCB), surface = Color(0xFF341100), onSurface = Color(0xFFFFDBCB),
-    surfaceVariant = Color(0xFF552000), onSurfaceVariant = Color(0xFFFFDBCB), surfaceContainer = Color(0xFF552000)
+val RoseDarkColorScheme = darkColorScheme(
+    primary = rosePrimaryDark, onPrimary = roseOnPrimaryDark, primaryContainer = rosePrimaryContainerDark, onPrimaryContainer = roseOnPrimaryContainerDark,
+    secondary = roseSecondaryDark, onSecondary = roseOnSecondaryDark, secondaryContainer = roseSecondaryContainerDark, onSecondaryContainer = roseOnSecondaryContainerDark,
+    background = Color(0xFF4C0519), onBackground = Color(0xFFFFE4E6), surface = Color(0xFF4C0519), onSurface = Color(0xFFFFE4E6),
+    surfaceVariant = Color(0xFF881337), onSurfaceVariant = Color(0xFFFFE4E6), surfaceContainer = Color(0xFF881337)
 )
 
 fun getColorSchemeForTheme(theme: AppTheme, isDark: Boolean) = when(theme) {
     AppTheme.OCEAN -> if (isDark) OceanDarkColorScheme else OceanLightColorScheme
     AppTheme.LAVENDER -> if (isDark) LavenderDarkColorScheme else LavenderLightColorScheme
-    AppTheme.SUNSET -> if (isDark) SunsetDarkColorScheme else SunsetLightColorScheme
+    AppTheme.ROSE -> if (isDark) RoseDarkColorScheme else RoseLightColorScheme
     else -> null // will fallback to default
 }

@@ -174,6 +174,6 @@ fun getPreviewColors(theme: AppTheme): List<Color> {
         AppTheme.MINT -> listOf(Color(0xFF10b981), Color(0xFFe7eeff), Color(0xFF006c49))
         AppTheme.OCEAN -> listOf(Color(0xFF006493), Color(0xFFCAE6FF), Color(0xFF50606E))
         AppTheme.LAVENDER -> listOf(Color(0xFF7D4E7F), Color(0xFFFFD6F9), Color(0xFF6B586A))
-        AppTheme.SUNSET -> listOf(Color(0xFF9E4200), Color(0xFFFFDBCB), Color(0xFF775749))
+        AppTheme.ROSE -> listOf(Color(0xFFE11D48), Color(0xFFFFE4E6), Color(0xFFBE123C))
     }
 }
