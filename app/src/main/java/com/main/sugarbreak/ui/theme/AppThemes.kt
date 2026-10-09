@@ -27,12 +27,14 @@ private val oceanOnSecondaryContainerDark = Color(0xFFD3E5F5)
 val OceanLightColorScheme = lightColorScheme(
     primary = oceanPrimaryLight, onPrimary = oceanOnPrimaryLight, primaryContainer = oceanPrimaryContainerLight, onPrimaryContainer = oceanOnPrimaryContainerLight,
     secondary = oceanSecondaryLight, onSecondary = oceanOnSecondaryLight, secondaryContainer = oceanSecondaryContainerLight, onSecondaryContainer = oceanOnSecondaryContainerLight,
-    background = backgroundLight, onBackground = onBackgroundLight, surface = surfaceLight, onSurface = onSurfaceLight
+    background = Color(0xFFF0F8FF), onBackground = Color(0xFF001E30), surface = Color(0xFFF0F8FF), onSurface = Color(0xFF001E30),
+    surfaceVariant = Color(0xFFE2EFF9), onSurfaceVariant = Color(0xFF40484C), surfaceContainer = Color(0xFFE2EFF9)
 )
 val OceanDarkColorScheme = darkColorScheme(
     primary = oceanPrimaryDark, onPrimary = oceanOnPrimaryDark, primaryContainer = oceanPrimaryContainerDark, onPrimaryContainer = oceanOnPrimaryContainerDark,
     secondary = oceanSecondaryDark, onSecondary = oceanOnSecondaryDark, secondaryContainer = oceanSecondaryContainerDark, onSecondaryContainer = oceanOnSecondaryContainerDark,
-    background = backgroundDark, onBackground = onBackgroundDark, surface = surfaceDark, onSurface = onSurfaceDark
+    background = Color(0xFF001E30), onBackground = Color(0xFFC6E7FF), surface = Color(0xFF001E30), onSurface = Color(0xFFC6E7FF),
+    surfaceVariant = Color(0xFF00344F), onSurfaceVariant = Color(0xFFC6E7FF), surfaceContainer = Color(0xFF00344F)
 )
 
 // LAVENDER
@@ -57,12 +59,14 @@ private val lavOnSecondaryContainerDark = Color(0xFFF3DAEF)
 val LavenderLightColorScheme = lightColorScheme(
     primary = lavPrimaryLight, onPrimary = lavOnPrimaryLight, primaryContainer = lavPrimaryContainerLight, onPrimaryContainer = lavOnPrimaryContainerLight,
     secondary = lavSecondaryLight, onSecondary = lavOnSecondaryLight, secondaryContainer = lavSecondaryContainerLight, onSecondaryContainer = lavOnSecondaryContainerLight,
-    background = backgroundLight, onBackground = onBackgroundLight, surface = surfaceLight, onSurface = onSurfaceLight
+    background = Color(0xFFFFF7FB), onBackground = Color(0xFF320A38), surface = Color(0xFFFFF7FB), onSurface = Color(0xFF320A38),
+    surfaceVariant = Color(0xFFF8E7F5), onSurfaceVariant = Color(0xFF4C3F4D), surfaceContainer = Color(0xFFF8E7F5)
 )
 val LavenderDarkColorScheme = darkColorScheme(
     primary = lavPrimaryDark, onPrimary = lavOnPrimaryDark, primaryContainer = lavPrimaryContainerDark, onPrimaryContainer = lavOnPrimaryContainerDark,
     secondary = lavSecondaryDark, onSecondary = lavOnSecondaryDark, secondaryContainer = lavSecondaryContainerDark, onSecondaryContainer = lavOnSecondaryContainerDark,
-    background = backgroundDark, onBackground = onBackgroundDark, surface = surfaceDark, onSurface = onSurfaceDark
+    background = Color(0xFF320A38), onBackground = Color(0xFFFFD6F9), surface = Color(0xFF320A38), onSurface = Color(0xFFFFD6F9),
+    surfaceVariant = Color(0xFF4A204E), onSurfaceVariant = Color(0xFFFFD6F9), surfaceContainer = Color(0xFF4A204E)
 )
 
 // SUNSET
@@ -87,12 +91,14 @@ private val sunOnSecondaryContainerDark = Color(0xFFFFDBCB)
 val SunsetLightColorScheme = lightColorScheme(
     primary = sunPrimaryLight, onPrimary = sunOnPrimaryLight, primaryContainer = sunPrimaryContainerLight, onPrimaryContainer = sunOnPrimaryContainerLight,
     secondary = sunSecondaryLight, onSecondary = sunOnSecondaryLight, secondaryContainer = sunSecondaryContainerLight, onSecondaryContainer = sunOnSecondaryContainerLight,
-    background = backgroundLight, onBackground = onBackgroundLight, surface = surfaceLight, onSurface = onSurfaceLight
+    background = Color(0xFFFFF8F6), onBackground = Color(0xFF341100), surface = Color(0xFFFFF8F6), onSurface = Color(0xFF341100),
+    surfaceVariant = Color(0xFFFBECE6), onSurfaceVariant = Color(0xFF52443F), surfaceContainer = Color(0xFFFBECE6)
 )
 val SunsetDarkColorScheme = darkColorScheme(
     primary = sunPrimaryDark, onPrimary = sunOnPrimaryDark, primaryContainer = sunPrimaryContainerDark, onPrimaryContainer = sunOnPrimaryContainerDark,
     secondary = sunSecondaryDark, onSecondary = sunOnSecondaryDark, secondaryContainer = sunSecondaryContainerDark, onSecondaryContainer = sunOnSecondaryContainerDark,
-    background = backgroundDark, onBackground = onBackgroundDark, surface = surfaceDark, onSurface = onSurfaceDark
+    background = Color(0xFF341100), onBackground = Color(0xFFFFDBCB), surface = Color(0xFF341100), onSurface = Color(0xFFFFDBCB),
+    surfaceVariant = Color(0xFF552000), onSurfaceVariant = Color(0xFFFFDBCB), surfaceContainer = Color(0xFF552000)
 )
 
 fun getColorSchemeForTheme(theme: AppTheme, isDark: Boolean) = when(theme) {
@@ -101,4 +107,3 @@ fun getColorSchemeForTheme(theme: AppTheme, isDark: Boolean) = when(theme) {
     AppTheme.SUNSET -> if (isDark) SunsetDarkColorScheme else SunsetLightColorScheme
     else -> null // will fallback to default
 }
-

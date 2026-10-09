@@ -102,6 +102,9 @@ fun AppNavGraph(
                 SettingsScreen(
                     onNavigateToUserDetails = {
                         navController.navigate("userdetails")
+                    },
+                    onNavigateToThemeSelection = {
+                        navController.navigate("themeselection")
                     }
                 )
             }
@@ -110,6 +113,11 @@ fun AppNavGraph(
                     onNavigateBack = {
                         navController.popBackStack()
                     }
+                )
+            }
+            composable("themeselection") {
+                com.main.sugarbreak.ui.settings.ThemeSelectionScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

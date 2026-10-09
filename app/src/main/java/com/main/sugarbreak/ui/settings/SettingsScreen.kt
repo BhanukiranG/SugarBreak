@@ -84,6 +84,7 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(
     onNavigateToUserDetails: () -> Unit,
+    onNavigateToThemeSelection: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -98,7 +99,6 @@ fun SettingsScreen(
     var showRuleDialog by remember { mutableStateOf(false) }
     var showGoalDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
-    var showThemeDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -250,7 +250,7 @@ fun SettingsScreen(
                                     iconBg = primaryColor.copy(alpha = 0.12f),
                                     title = "App Theme",
                                     valueText = uiState.appTheme.displayName,
-                                    onClick = { showThemeDialog = true }
+                                    onClick = onNavigateToThemeSelection
                                 )
                             }
                         }
@@ -570,45 +570,6 @@ fun SettingsScreen(
                 dismissButton = {
                     TextButton(onClick = { showResetDialog = false }) {
                         Text("Cancel")
-                    }
-                }
-            )
-        }
-
-        if (showThemeDialog) {
-            AlertDialog(
-                onDismissRequest = { showThemeDialog = false },
-                title = { Text("Select Theme", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column {
-                        com.main.sugarbreak.domain.model.AppTheme.values().forEach { theme ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { 
-                                        viewModel.setAppTheme(theme)
-                                        showThemeDialog = false
-                                    }
-                                    .padding(vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = uiState.appTheme == theme,
-                                    onClick = { 
-                                        viewModel.setAppTheme(theme)
-                                        showThemeDialog = false
-                                    },
-                                    colors = RadioButtonDefaults.colors(selectedColor = primaryColor)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(theme.displayName, style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showThemeDialog = false }) {
-                        Text("Close", color = primaryColor)
                     }
                 }
             )
