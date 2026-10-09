@@ -33,9 +33,14 @@ class OnboardingViewModelTest {
         var onboardingCompleted = false
         var userName = ""
         var isDarkMode: Boolean? = null
+        var appTheme: com.main.sugarbreak.domain.model.AppTheme = com.main.sugarbreak.domain.model.AppTheme.MINT
         override fun getIsDarkMode(): Flow<Boolean?> = flowOf(isDarkMode)
         override suspend fun setIsDarkMode(isDark: Boolean?) {
             isDarkMode = isDark
+        }
+        override fun getAppTheme(): Flow<com.main.sugarbreak.domain.model.AppTheme> = flowOf(appTheme)
+        override suspend fun setAppTheme(theme: com.main.sugarbreak.domain.model.AppTheme) {
+            appTheme = theme
         }
 
 

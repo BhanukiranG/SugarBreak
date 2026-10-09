@@ -56,14 +56,20 @@ class SettingsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                preferencesRepository.getReminderSettings(),
-                preferencesRepository.getChallengeBehavior(),
-                preferencesRepository.getUserName(),
-                getActiveChallengeUseCase(),
-                preferencesRepository.getIsDarkMode(),
-                preferencesRepository.getAppTheme()
-            ) { reminderSettings, behavior, userName, challenge, isDark, appTheme ->
-                SettingsTuple(reminderSettings, behavior, userName, challenge, isDark, appTheme)
+                combine(
+                    preferencesRepository.getReminderSettings(),
+                    preferencesRepository.getChallengeBehavior(),
+                    preferencesRepository.getUserName(),
+                    ::Triple
+                ),
+                combine(
+                    getActiveChallengeUseCase(),
+                    preferencesRepository.getIsDarkMode(),
+                    preferencesRepository.getAppTheme(),
+                    ::Triple
+                )
+            ) { t1, t2 ->
+                SettingsTuple(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
             }.collectLatest { tuple ->
                 _uiState.update { 
                     it.copy(
