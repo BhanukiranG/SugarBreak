@@ -110,8 +110,7 @@ fun HomeScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
                                 .background(
-                                    if (isDark) Color(0xFF13221C)
-                                    else primaryColor.copy(alpha = 0.10f)
+                                    primaryColor.copy(alpha = 0.15f)
                                 )
                                 .border(
                                     1.dp,
@@ -148,8 +147,7 @@ fun HomeScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = if (isDark) Color(0xFF0B0F17).copy(alpha = 0.85f)
-                        else Color.White.copy(alpha = 0.82f)
+                        containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
                     )
                 )
             }
@@ -309,8 +307,7 @@ fun HomeScreen(
                                     .height(10.dp)
                                     .clip(RoundedCornerShape(50))
                                     .background(
-                                        if (isDark) Color(0xFF1A2738)
-                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                                     )
                                     .border(
                                         1.dp,
@@ -339,8 +336,7 @@ fun HomeScreen(
                             GlassBox(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(14.dp),
-                                backgroundColorOverride = if (isDark) Color(0xFF131F2A).copy(alpha = 0.8f)
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                backgroundColorOverride = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDark) 0.25f else 0.45f),
                                 borderColorOverride = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                             ) {
                                 Row(
