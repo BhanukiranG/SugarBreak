@@ -228,7 +228,7 @@ fun HomeScreen(
                     GlassCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
-                        isElevated = true
+                        isElevated = false
                     ) {
                         Column(
                             modifier = Modifier
