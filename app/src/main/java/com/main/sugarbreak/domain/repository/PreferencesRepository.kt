@@ -15,5 +15,7 @@ interface PreferencesRepository {
     suspend fun setUserName(name: String)
     fun getIsDarkMode(): Flow<Boolean?>
     suspend fun setIsDarkMode(isDark: Boolean?)
+    fun getAppTheme(): Flow<com.main.sugarbreak.domain.model.AppTheme>
+    suspend fun setAppTheme(theme: com.main.sugarbreak.domain.model.AppTheme)
 }
 

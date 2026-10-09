@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.onboarding
+package com.main.sugarbreak.ui.onboarding
 
 import com.main.sugarbreak.R
 
@@ -52,18 +52,28 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.SelectableDates
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -618,9 +628,48 @@ fun Step3Rule(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Step4TargetDays(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
     val primaryColor = MaterialTheme.colorScheme.primary
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val tomorrowUtcMillis = LocalDate.now().plusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+                    return utcTimeMillis >= tomorrowUtcMillis
+                }
+            }
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val selectedDate = Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
+                        val today = LocalDate.now()
+                        val days = ChronoUnit.DAYS.between(today, selectedDate).toInt()
+                        if (days > 0) {
+                            onDaysSelected(days)
+                        }
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK", color = primaryColor)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.outline)
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     Column {
         Text(
@@ -678,10 +727,47 @@ fun Step4TargetDays(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
                     }
                 }
             }
+            
+            val isCustomSelected = !daysOptions.contains(selectedDays) && selectedDays > 0
+            Row(modifier = Modifier.fillMaxWidth()) {
+                GlassCard(
+                    shape = RoundedCornerShape(18.dp),
+                    isElevated = isCustomSelected,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .clickable { showDatePicker = true }
+                        .then(
+                            if (isCustomSelected) Modifier.border(1.5.dp, primaryColor, RoundedCornerShape(18.dp))
+                            else Modifier
+                        )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(vertical = 24.dp, horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = if (isCustomSelected) "$selectedDays" else "Custom",
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                                color = if (isCustomSelected) primaryColor else MaterialTheme.colorScheme.onSurface
+                            )
+                            if (isCustomSelected) {
+                                Text(
+                                    text = "Days",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                    color = primaryColor
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

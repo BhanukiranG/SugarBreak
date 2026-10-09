@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.settings
+package com.main.sugarbreak.ui.settings
 
 import android.content.Context
 import android.content.Intent
@@ -36,7 +36,8 @@ data class SettingsUiState(
     val challengeGoalDays: Int = 30,
     val activeChallengeId: Long? = null,
     val isLoading: Boolean = true,
-    val isDarkMode: Boolean? = null
+    val isDarkMode: Boolean? = null,
+    val appTheme: com.main.sugarbreak.domain.model.AppTheme = com.main.sugarbreak.domain.model.AppTheme.MINT
 )
 
 @HiltViewModel
@@ -55,13 +56,20 @@ class SettingsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                preferencesRepository.getReminderSettings(),
-                preferencesRepository.getChallengeBehavior(),
-                preferencesRepository.getUserName(),
-                getActiveChallengeUseCase(),
-                preferencesRepository.getIsDarkMode()
-            ) { reminderSettings, behavior, userName, challenge, isDark ->
-                SettingsTuple(reminderSettings, behavior, userName, challenge, isDark)
+                combine(
+                    preferencesRepository.getReminderSettings(),
+                    preferencesRepository.getChallengeBehavior(),
+                    preferencesRepository.getUserName(),
+                    ::Triple
+                ),
+                combine(
+                    getActiveChallengeUseCase(),
+                    preferencesRepository.getIsDarkMode(),
+                    preferencesRepository.getAppTheme(),
+                    ::Triple
+                )
+            ) { t1, t2 ->
+                SettingsTuple(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
             }.collectLatest { tuple ->
                 _uiState.update { 
                     it.copy(
@@ -72,7 +80,8 @@ class SettingsViewModel @Inject constructor(
                         challengeGoalDays = tuple.challenge?.targetSuccessfulDays ?: 30,
                         activeChallengeId = tuple.challenge?.id,
                         isLoading = false,
-                        isDarkMode = tuple.isDarkMode
+                        isDarkMode = tuple.isDarkMode,
+                        appTheme = tuple.appTheme
                     ) 
                 }
             }
@@ -147,15 +156,15 @@ class SettingsViewModel @Inject constructor(
                 val goalDays = _uiState.value.challengeGoalDays
                 
                 val builder = StringBuilder()
-                builder.append("🌟 *Sugar Break Progress* 🌟\n\n")
-                builder.append("👤 *Name:* $userName\n")
-                builder.append("🎯 *Challenge:* $goalDays Days\n")
+                builder.append("?? *Sugar Break Progress* ??\n\n")
+                builder.append("?? *Name:* $userName\n")
+                builder.append("?? *Challenge:* $goalDays Days\n")
                 
                 val successCount = records.count { it.status == com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS }
                 val consistency = if (records.isNotEmpty()) (successCount * 100) / records.size else 0
-                builder.append("📊 *Consistency:* $consistency%\n\n")
+                builder.append("?? *Consistency:* $consistency%\n\n")
                 
-                builder.append("📅 *Check-in History:*\n")
+                builder.append("?? *Check-in History:*\n")
                 
                 val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd")
                 if (records.isEmpty()) {
@@ -164,14 +173,14 @@ class SettingsViewModel @Inject constructor(
                     records.forEach { record ->
                         val dateStr = record.date.format(formatter)
                         val statusEmoji = when(record.status) {
-                            com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS -> "✅ On Track"
-                            com.main.sugarbreak.domain.model.CheckInStatus.SLIP -> "🟠 Slip"
-                            com.main.sugarbreak.domain.model.CheckInStatus.SKIPPED -> "⚪ Rest Day"
-                            com.main.sugarbreak.domain.model.CheckInStatus.PENDING -> "⏳ Pending"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SUCCESS -> "? On Track"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SLIP -> "?? Slip"
+                            com.main.sugarbreak.domain.model.CheckInStatus.SKIPPED -> "? Rest Day"
+                            com.main.sugarbreak.domain.model.CheckInStatus.PENDING -> "? Pending"
                         }
                         val reasonStr = if (record.reason != null && record.status == com.main.sugarbreak.domain.model.CheckInStatus.SLIP) {
                             val rName = record.reason.name.replace("_", " ")
-                            val formattedReason = rName.substring(0, 1).toUpperCase() + rName.substring(1).toLowerCase()
+                            val formattedReason = rName.substring(0, 1).uppercase() + rName.substring(1).lowercase()
                             " ($formattedReason)"
                         } else ""
                         
@@ -196,6 +205,12 @@ class SettingsViewModel @Inject constructor(
             preferencesRepository.setIsDarkMode(isDark)
         }
     }
+
+    fun setAppTheme(theme: com.main.sugarbreak.domain.model.AppTheme) {
+        viewModelScope.launch {
+            preferencesRepository.setAppTheme(theme)
+        }
+    }
 }
 
 private data class SettingsTuple(
@@ -203,8 +218,14 @@ private data class SettingsTuple(
     val behavior: ChallengeBehavior,
     val userName: String,
     val challenge: Challenge?,
-    val isDarkMode: Boolean?
+    val isDarkMode: Boolean?,
+    val appTheme: com.main.sugarbreak.domain.model.AppTheme
 )
+
+
+
+
+
 
 
 

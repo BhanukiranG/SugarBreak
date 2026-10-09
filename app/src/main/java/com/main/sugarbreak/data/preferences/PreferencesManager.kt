@@ -22,6 +22,7 @@ class PreferencesManager(private val context: Context) {
         val CHALLENGE_BEHAVIOR = stringPreferencesKey("CHALLENGE_BEHAVIOR")
         val USER_NAME = stringPreferencesKey("USER_NAME")
         val IS_DARK_MODE = booleanPreferencesKey("IS_DARK_MODE")
+        val APP_THEME = stringPreferencesKey("APP_THEME")
     }
 
     val reminderEnabled: Flow<Boolean> = context.dataStore.data.map { it[REMINDER_ENABLED] ?: false }
@@ -31,6 +32,7 @@ class PreferencesManager(private val context: Context) {
     val challengeBehavior: Flow<String?> = context.dataStore.data.map { it[CHALLENGE_BEHAVIOR] }
     val userName: Flow<String?> = context.dataStore.data.map { it[USER_NAME] }
     val isDarkMode: Flow<Boolean?> = context.dataStore.data.map { it[IS_DARK_MODE] }
+    val appTheme: Flow<String?> = context.dataStore.data.map { it[APP_THEME] }
 
     suspend fun setReminderEnabled(enabled: Boolean) {
         context.dataStore.edit { it[REMINDER_ENABLED] = enabled }
@@ -59,5 +61,9 @@ class PreferencesManager(private val context: Context) {
         context.dataStore.edit { preferences ->
             if (isDark == null) preferences.remove(IS_DARK_MODE) else preferences[IS_DARK_MODE] = isDark
         }
+    }
+
+    suspend fun setAppTheme(theme: String) {
+        context.dataStore.edit { it[APP_THEME] = theme }
     }
 }

@@ -61,5 +61,22 @@ class PreferencesRepositoryImpl @Inject constructor(
     override suspend fun setIsDarkMode(isDark: Boolean?) {
         preferencesManager.setIsDarkMode(isDark)
     }
+
+    override fun getAppTheme(): Flow<com.main.sugarbreak.domain.model.AppTheme> {
+        return preferencesManager.appTheme.map { themeStr ->
+            themeStr?.let { 
+                try {
+                    com.main.sugarbreak.domain.model.AppTheme.valueOf(it) 
+                } catch (e: Exception) {
+                    com.main.sugarbreak.domain.model.AppTheme.MINT
+                }
+            } ?: com.main.sugarbreak.domain.model.AppTheme.MINT
+        }
+    }
+
+    override suspend fun setAppTheme(theme: com.main.sugarbreak.domain.model.AppTheme) {
+        preferencesManager.setAppTheme(theme.name)
+    }
 }
+
 

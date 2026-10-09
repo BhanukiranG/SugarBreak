@@ -84,6 +84,7 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(
     onNavigateToUserDetails: () -> Unit,
+    onNavigateToThemeSelection: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -125,7 +126,7 @@ fun SettingsScreen(
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = (-0.5).sp
                                 ),
-                                color = if (isDark) Color.White else primaryColor
+                                color = primaryColor
                             )
                         }
                     },
@@ -239,6 +240,17 @@ fun SettingsScreen(
                                     onCheckedChange = { isChecked ->
                                         viewModel.setIsDarkMode(isChecked)
                                     }
+                                )
+
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+
+                                SettingsActionRow(
+                                    icon = Icons.Default.Favorite,
+                                    iconTint = primaryColor,
+                                    iconBg = primaryColor.copy(alpha = 0.12f),
+                                    title = "App Theme",
+                                    valueText = uiState.appTheme.displayName,
+                                    onClick = onNavigateToThemeSelection
                                 )
                             }
                         }
@@ -703,6 +715,9 @@ private fun SettingsActionRow(
         )
     }
 }
+
+
+
 
 
 

@@ -22,7 +22,11 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = androidx.hilt.navigation.compose.hiltViewModel()
             val startDestination by mainViewModel.startDestination.collectAsState()
             val isDarkMode by mainViewModel.isDarkMode.collectAsState()
-            SugarBreakTheme(darkTheme = isDarkMode ?: androidx.compose.foundation.isSystemInDarkTheme()) {
+            val appTheme by mainViewModel.appTheme.collectAsState()
+            SugarBreakTheme(
+                darkTheme = isDarkMode ?: androidx.compose.foundation.isSystemInDarkTheme(),
+                appTheme = appTheme
+            ) {
                 if (startDestination != null) {
                     AppNavGraph(
                         modifier = Modifier.fillMaxSize(),
@@ -33,3 +37,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

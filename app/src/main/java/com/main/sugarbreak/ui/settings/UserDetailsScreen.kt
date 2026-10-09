@@ -98,7 +98,7 @@ fun UserDetailsScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = if (isDark) Color.White else primaryColor,
+                                tint = primaryColor,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
