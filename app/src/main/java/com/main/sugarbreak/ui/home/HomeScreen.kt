@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.home
+package com.main.sugarbreak.ui.home
 
 import com.main.sugarbreak.R
 
@@ -99,7 +99,7 @@ fun HomeScreen(
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = (-0.5).sp
                                 ),
-                                color = if (isDark) Color.White else primaryColor
+                                color = primaryColor
                             )
                         }
                     },

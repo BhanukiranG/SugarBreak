@@ -180,7 +180,7 @@ class SettingsViewModel @Inject constructor(
                         }
                         val reasonStr = if (record.reason != null && record.status == com.main.sugarbreak.domain.model.CheckInStatus.SLIP) {
                             val rName = record.reason.name.replace("_", " ")
-                            val formattedReason = rName.substring(0, 1).toUpperCase() + rName.substring(1).toLowerCase()
+                            val formattedReason = rName.substring(0, 1).uppercase() + rName.substring(1).lowercase()
                             " ($formattedReason)"
                         } else ""
                         

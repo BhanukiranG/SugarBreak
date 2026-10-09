@@ -149,7 +149,7 @@ fun CheckInScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Go back",
-                            tint = if (isDark) Color.White else primaryColor,
+                            tint = primaryColor,
                             modifier = Modifier.size(20.dp)
                         )
                     }
