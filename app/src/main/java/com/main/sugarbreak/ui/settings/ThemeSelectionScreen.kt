@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.sugarbreak.domain.model.AppTheme
 
+import com.main.sugarbreak.ui.components.SugarBackground
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeSelectionScreen(
@@ -32,21 +34,23 @@ fun ThemeSelectionScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isDark = uiState.isDarkMode ?: androidx.compose.foundation.isSystemInDarkTheme()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Theme & Appearance", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+    SugarBackground {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Theme & Appearance", fontWeight = FontWeight.Bold) },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
-        },
-        bottomBar = {
+            },
+            bottomBar = {
+
             Box(modifier = Modifier.padding(16.dp)) {
                 Button(
                     onClick = onNavigateBack,
@@ -58,7 +62,7 @@ fun ThemeSelectionScreen(
                 }
             }
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -120,6 +124,7 @@ fun ThemeSelectionScreen(
             }
         }
     }
+}
 }
 
 @Composable
