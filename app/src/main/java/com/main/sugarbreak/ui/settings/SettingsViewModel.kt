@@ -47,7 +47,8 @@ class SettingsViewModel @Inject constructor(
     private val challengeRepository: ChallengeRepository,
     private val checkInRepository: CheckInRepository,
     private val scheduleReminderUseCase: ScheduleReminderUseCase,
-    private val cancelReminderUseCase: CancelReminderUseCase
+    private val cancelReminderUseCase: CancelReminderUseCase,
+    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -127,12 +128,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateChallengeGoal(targetDays: Int) {
+    fun updateChallengeGoal(targetDays: Int, onNewChallengeCreated: () -> Unit = {}) {
         viewModelScope.launch {
             val currentChallenge = getActiveChallengeUseCase().firstOrNull()
             if (currentChallenge != null) {
                 val updated = currentChallenge.copy(targetSuccessfulDays = targetDays)
                 challengeRepository.update(updated)
+            } else {
+                val behavior = preferencesRepository.getChallengeBehavior().firstOrNull() ?: ChallengeBehavior.CONTINUE
+                createChallengeUseCase(targetDays, behavior)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onNewChallengeCreated()
+                }
             }
         }
     }

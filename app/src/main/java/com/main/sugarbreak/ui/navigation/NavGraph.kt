@@ -105,6 +105,15 @@ fun AppNavGraph(
                     },
                     onNavigateToThemeSelection = {
                         navController.navigate("themeselection")
+                    },
+                    onNavigateToHome = {
+                        navController.navigate("home") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }

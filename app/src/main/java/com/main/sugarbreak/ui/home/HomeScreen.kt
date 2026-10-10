@@ -32,7 +32,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -62,6 +66,7 @@ fun HomeScreen(
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
     val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
+    var showGoalDialog by remember { mutableStateOf(false) }
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
@@ -179,7 +184,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
-                        onClick = onNavigateToSettings,
+                        onClick = { showGoalDialog = true },
                         shape = RoundedCornerShape(percent = 50),
                         colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                         modifier = Modifier
@@ -457,9 +462,49 @@ fun HomeScreen(
                 }
             }
         }
+
+        if (showGoalDialog) {
+            androidx.compose.ui.window.Dialog(
+                onDismissRequest = { showGoalDialog = false },
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                SugarBackground {
+                    Scaffold(
+                        containerColor = Color.Transparent,
+                        topBar = {
+                            TopAppBar(
+                                title = { },
+                                navigationIcon = {
+                                    IconButton(onClick = { showGoalDialog = false }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                            )
+                        }
+                    ) { paddingValues ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 24.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Spacer(Modifier.height(16.dp))
+                            com.main.sugarbreak.ui.onboarding.Step4TargetDays(
+                                selectedDays = 30,
+                                onDaysSelected = { 
+                                    viewModel.startNewChallenge(it)
+                                    showGoalDialog = false 
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
-
 
 
 

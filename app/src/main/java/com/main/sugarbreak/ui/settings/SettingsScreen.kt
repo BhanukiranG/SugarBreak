@@ -85,6 +85,7 @@ import java.util.Locale
 fun SettingsScreen(
     onNavigateToUserDetails: () -> Unit,
     onNavigateToThemeSelection: () -> Unit,
+    onNavigateToHome: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -537,7 +538,9 @@ fun SettingsScreen(
                             com.main.sugarbreak.ui.onboarding.Step4TargetDays(
                                 selectedDays = uiState.challengeGoalDays,
                                 onDaysSelected = { 
-                                    viewModel.updateChallengeGoal(it)
+                                    viewModel.updateChallengeGoal(it) {
+                                        onNavigateToHome()
+                                    }
                                     showGoalDialog = false 
                                 }
                             )

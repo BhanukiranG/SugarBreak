@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.home
+package com.main.sugarbreak.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeState(
@@ -32,7 +34,8 @@ class HomeViewModel @Inject constructor(
     private val getActiveChallengeUseCase: GetActiveChallengeUseCase,
     private val calculateStreakUseCase: CalculateStreakUseCase,
     private val getTodayCheckInUseCase: GetTodayCheckInUseCase,
-    private val preferencesRepository: com.main.sugarbreak.domain.repository.PreferencesRepository
+    private val preferencesRepository: com.main.sugarbreak.domain.repository.PreferencesRepository,
+    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -69,5 +72,12 @@ class HomeViewModel @Inject constructor(
         }.onEach { newState ->
             _state.value = newState
         }.launchIn(viewModelScope)
+    }
+
+    fun startNewChallenge(targetDays: Int) {
+        viewModelScope.launch {
+            val behavior = preferencesRepository.getChallengeBehavior().firstOrNull() ?: com.main.sugarbreak.domain.model.ChallengeBehavior.CONTINUE
+            createChallengeUseCase(targetDays, behavior)
+        }
     }
 }

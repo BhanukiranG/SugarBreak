@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.notification
+package com.main.sugarbreak.notification
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,6 +7,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,12 +23,24 @@ class ReminderReceiver : BroadcastReceiver() {
     @Inject
     lateinit var reminderScheduler: com.main.sugarbreak.domain.repository.ReminderScheduler
 
-    override fun onReceive(context: Context, intent: Intent) {
-        notificationHelper.showNotification()
+    @Inject
+    lateinit var getActiveChallengeUseCase: com.main.sugarbreak.domain.usecase.GetActiveChallengeUseCase
 
+    @Inject
+    lateinit var getTodayCheckInUseCase: com.main.sugarbreak.domain.usecase.GetTodayCheckInUseCase
+
+    override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                val challenge = getActiveChallengeUseCase().firstOrNull()
+                if (challenge != null) {
+                    val checkIn = getTodayCheckInUseCase(challenge.id).firstOrNull()
+                    if (checkIn == null) {
+                        notificationHelper.showNotification()
+                    }
+                }
+
                 val settings = preferencesRepository.getReminderSettings().first()
                 if (settings.enabled) {
                     reminderScheduler.schedule(settings.hour, settings.minute)
