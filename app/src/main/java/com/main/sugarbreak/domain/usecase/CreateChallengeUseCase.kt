@@ -1,21 +1,24 @@
-﻿package com.main.sugarbreak.domain.usecase
+package com.main.sugarbreak.domain.usecase
 
 import com.main.sugarbreak.domain.model.Challenge
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.domain.model.ChallengeStatus
+import com.main.sugarbreak.domain.model.CheckInStatus
 import com.main.sugarbreak.domain.repository.ChallengeRepository
+import com.main.sugarbreak.domain.repository.CheckInRepository
 import kotlinx.coroutines.flow.firstOrNull
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
 class CreateChallengeUseCase @Inject constructor(
-    private val challengeRepository: ChallengeRepository
+    private val challengeRepository: ChallengeRepository,
+    private val checkInRepository: CheckInRepository? = null
 ) {
     suspend operator fun invoke(
         targetSuccessfulDays: Int,
         behavior: ChallengeBehavior
-    ) {
+    ): Long {
         val activeChallenge = challengeRepository.getActiveChallenge().firstOrNull()
         if (activeChallenge != null) {
             challengeRepository.update(
@@ -32,6 +35,24 @@ class CreateChallengeUseCase @Inject constructor(
             createdAt = LocalDateTime.now(),
             behavior = behavior
         )
-        challengeRepository.insert(newChallenge)
+        val newId = challengeRepository.insert(newChallenge)
+
+        if (checkInRepository != null) {
+            val today = LocalDate.now()
+            val existingToday = checkInRepository.getAllCheckIns().firstOrNull()?.find { 
+                it.date == today && it.status != CheckInStatus.PENDING 
+            }
+            if (existingToday != null) {
+                checkInRepository.insert(
+                    existingToday.copy(
+                        id = 0,
+                        challengeId = newId,
+                        updatedAt = LocalDateTime.now()
+                    )
+                )
+            }
+        }
+
+        return newId
     }
 }

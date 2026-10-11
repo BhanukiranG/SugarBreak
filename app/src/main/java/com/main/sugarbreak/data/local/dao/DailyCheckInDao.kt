@@ -28,4 +28,10 @@ interface DailyCheckInDao {
 
     @Query("DELETE FROM daily_check_ins WHERE challengeId = :challengeId")
     suspend fun deleteAllCheckInsForChallenge(challengeId: Long)
+
+    @Query("SELECT * FROM daily_check_ins WHERE date = :date AND status != 'PENDING' LIMIT 1")
+    suspend fun getAnyCompletedCheckInForDate(date: LocalDate): DailyCheckInEntity?
+
+    @Query("SELECT * FROM daily_check_ins ORDER BY date DESC")
+    fun getAllCheckIns(): Flow<List<DailyCheckInEntity>>
 }

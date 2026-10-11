@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.home
+package com.main.sugarbreak.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,10 +17,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeState(
     val activeChallenge: Challenge? = null,
+    val completedChallenge: Challenge? = null,
     val streakSummary: StreakSummary? = null,
     val todayCheckIn: DailyCheckIn? = null,
     val userName: String = "Local Profile",
@@ -32,7 +35,9 @@ class HomeViewModel @Inject constructor(
     private val getActiveChallengeUseCase: GetActiveChallengeUseCase,
     private val calculateStreakUseCase: CalculateStreakUseCase,
     private val getTodayCheckInUseCase: GetTodayCheckInUseCase,
-    private val preferencesRepository: com.main.sugarbreak.domain.repository.PreferencesRepository
+    private val preferencesRepository: com.main.sugarbreak.domain.repository.PreferencesRepository,
+    private val challengeRepository: com.main.sugarbreak.domain.repository.ChallengeRepository,
+    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -46,10 +51,12 @@ class HomeViewModel @Inject constructor(
     private fun loadHomeData() {
         combine(
             getActiveChallengeUseCase(),
-            preferencesRepository.getUserName()
-        ) { challenge, userName ->
-            Pair(challenge, userName)
-        }.flatMapLatest { (challenge, userName) ->
+            preferencesRepository.getUserName(),
+            challengeRepository.getAllChallenges()
+        ) { challenge, userName, allChallenges ->
+            Triple(challenge, userName, allChallenges)
+        }.flatMapLatest { (challenge, userName, allChallenges) ->
+            val lastCompleted = allChallenges.filter { it.status == com.main.sugarbreak.domain.model.ChallengeStatus.COMPLETED }.maxByOrNull { it.id }
             if (challenge != null) {
                 combine(
                     calculateStreakUseCase(challenge.id),
@@ -57,6 +64,7 @@ class HomeViewModel @Inject constructor(
                 ) { streak, checkIn ->
                     HomeState(
                         activeChallenge = challenge,
+                        completedChallenge = null,
                         streakSummary = streak,
                         todayCheckIn = checkIn,
                         userName = userName,
@@ -64,10 +72,27 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } else {
-                flowOf(HomeState(activeChallenge = null, userName = userName, isLoading = false))
+                flowOf(
+                    HomeState(
+                        activeChallenge = null,
+                        completedChallenge = lastCompleted,
+                        userName = userName,
+                        isLoading = false
+                    )
+                )
             }
         }.onEach { newState ->
             _state.value = newState
         }.launchIn(viewModelScope)
+    }
+
+    fun startNewChallenge(targetDays: Int, behavior: com.main.sugarbreak.domain.model.ChallengeBehavior? = null) {
+        viewModelScope.launch {
+            val selectedBehavior = behavior ?: preferencesRepository.getChallengeBehavior().firstOrNull() ?: com.main.sugarbreak.domain.model.ChallengeBehavior.CONTINUE
+            if (behavior != null) {
+                preferencesRepository.updateChallengeBehavior(behavior)
+            }
+            createChallengeUseCase(targetDays, selectedBehavior)
+        }
     }
 }

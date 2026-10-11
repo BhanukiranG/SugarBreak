@@ -35,6 +35,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -61,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -507,6 +510,10 @@ fun SettingsScreen(
 
         // Challenge Goal Selection Dialog
         if (showGoalDialog) {
+            var selectedDays by remember { mutableStateOf(uiState.challengeGoalDays) }
+            var isStartNew by remember { mutableStateOf(uiState.activeChallengeId == null) }
+            var selectedRule by remember { mutableStateOf(uiState.challengeBehavior) }
+
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showGoalDialog = false },
                 properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
@@ -516,7 +523,13 @@ fun SettingsScreen(
                         containerColor = Color.Transparent,
                         topBar = {
                             TopAppBar(
-                                title = { },
+                                title = { 
+                                    Text(
+                                        if (isStartNew) "Start New Challenge" else "Challenge Goal",
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = primaryColor
+                                    )
+                                },
                                 navigationIcon = {
                                     IconButton(onClick = { showGoalDialog = false }) {
                                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -524,6 +537,47 @@ fun SettingsScreen(
                                 },
                                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                             )
+                        },
+                        bottomBar = {
+                            androidx.compose.material3.Surface(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = if (isDark) 0.95f else 0.90f),
+                                shadowElevation = 8.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .navigationBarsPadding()
+                                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            if (isStartNew) {
+                                                viewModel.startNewChallenge(selectedDays, selectedRule) {
+                                                    onNavigateToHome()
+                                                }
+                                            } else {
+                                                viewModel.updateChallengeGoal(selectedDays) {
+                                                    onNavigateToHome()
+                                                }
+                                            }
+                                            showGoalDialog = false
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(50.dp)
+                                            .shadow(8.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.35f)),
+                                        shape = RoundedCornerShape(50),
+                                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                                    ) {
+                                        Text(
+                                            if (isStartNew) "Start New Challenge" else "Update Goal",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                }
+                            }
                         }
                     ) { paddingValues ->
                         Column(
@@ -533,14 +587,64 @@ fun SettingsScreen(
                                 .padding(horizontal = 24.dp)
                                 .verticalScroll(rememberScrollState())
                         ) {
+                            if (uiState.activeChallengeId != null) {
+                                Spacer(Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(50))
+                                        .background(if (isDark) Color(0xFF131C26).copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f))
+                                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), RoundedCornerShape(50))
+                                        .padding(4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(if (!isStartNew) primaryColor else Color.Transparent)
+                                            .clickable { isStartNew = false }
+                                            .padding(vertical = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "Update Goal",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                            color = if (!isStartNew) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(if (isStartNew) primaryColor else Color.Transparent)
+                                            .clickable { isStartNew = true }
+                                            .padding(vertical = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "Start Fresh",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                            color = if (isStartNew) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
                             Spacer(Modifier.height(16.dp))
                             com.main.sugarbreak.ui.onboarding.Step4TargetDays(
-                                selectedDays = uiState.challengeGoalDays,
-                                onDaysSelected = { 
-                                    viewModel.updateChallengeGoal(it)
-                                    showGoalDialog = false 
-                                }
+                                selectedDays = selectedDays,
+                                onDaysSelected = { selectedDays = it }
                             )
+
+                            if (isStartNew) {
+                                Spacer(Modifier.height(24.dp))
+                                com.main.sugarbreak.ui.onboarding.Step3Rule(
+                                    selectedRule = selectedRule,
+                                    onRuleSelected = { selectedRule = it }
+                                )
+                            }
+                            Spacer(Modifier.height(24.dp))
                         }
                     }
                 }
