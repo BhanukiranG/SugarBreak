@@ -88,7 +88,6 @@ import java.util.Locale
 fun SettingsScreen(
     onNavigateToUserDetails: () -> Unit,
     onNavigateToThemeSelection: () -> Unit,
-    onNavigateToHome: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
