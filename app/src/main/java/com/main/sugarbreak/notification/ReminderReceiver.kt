@@ -29,16 +29,21 @@ class ReminderReceiver : BroadcastReceiver() {
     @Inject
     lateinit var getTodayCheckInUseCase: com.main.sugarbreak.domain.usecase.GetTodayCheckInUseCase
 
+    @Inject
+    lateinit var checkInRepository: com.main.sugarbreak.domain.repository.CheckInRepository
+
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val challenge = getActiveChallengeUseCase().firstOrNull()
-                if (challenge != null) {
-                    val checkIn = getTodayCheckInUseCase(challenge.id).firstOrNull()
-                    if (checkIn == null) {
+                val hasLoggedToday = checkInRepository.hasCompletedCheckInForDate(java.time.LocalDate.now())
+                if (!hasLoggedToday) {
+                    val challenge = getActiveChallengeUseCase().firstOrNull()
+                    if (challenge != null) {
                         notificationHelper.showNotification()
                     }
+                } else {
+                    notificationHelper.cancelNotification()
                 }
 
                 val settings = preferencesRepository.getReminderSettings().first()

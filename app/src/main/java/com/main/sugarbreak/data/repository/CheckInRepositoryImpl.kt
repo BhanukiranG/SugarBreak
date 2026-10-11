@@ -36,4 +36,12 @@ class CheckInRepositoryImpl @Inject constructor(
     override suspend fun deleteAllCheckInsForChallenge(challengeId: Long) {
         dailyCheckInDao.deleteAllCheckInsForChallenge(challengeId)
     }
+
+    override suspend fun hasCompletedCheckInForDate(date: LocalDate): Boolean {
+        return dailyCheckInDao.getAnyCompletedCheckInForDate(date) != null
+    }
+
+    override fun getAllCheckIns(): Flow<List<DailyCheckIn>> {
+        return dailyCheckInDao.getAllCheckIns().map { list -> list.map { it.toDomain() } }
+    }
 }

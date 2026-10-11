@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.ui.history
+package com.main.sugarbreak.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,7 @@ import com.main.sugarbreak.domain.model.DailyCheckIn
 import com.main.sugarbreak.domain.repository.CheckInRepository
 import com.main.sugarbreak.domain.usecase.GetActiveChallengeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,14 +37,18 @@ class HistoryViewModel @Inject constructor(
 
     private fun loadHistory() {
         viewModelScope.launch {
-            getActiveChallengeUseCase().collectLatest { challenge ->
-                if (challenge != null) {
-                    _uiState.update { it.copy(challenge = challenge, isLoading = true) }
-                    checkInRepository.getCheckInsForChallenge(challenge.id).collectLatest { records ->
-                        _uiState.update { it.copy(records = records, isLoading = false) }
-                    }
-                } else {
-                    _uiState.update { it.copy(challenge = null, records = emptyList(), isLoading = false) }
+            combine(
+                getActiveChallengeUseCase(),
+                checkInRepository.getAllCheckIns()
+            ) { challenge, records ->
+                Pair(challenge, records)
+            }.collectLatest { (challenge, records) ->
+                _uiState.update { 
+                    it.copy(
+                        challenge = challenge,
+                        records = records,
+                        isLoading = false
+                    ) 
                 }
             }
         }

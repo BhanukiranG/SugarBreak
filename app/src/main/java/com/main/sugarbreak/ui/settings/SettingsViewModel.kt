@@ -128,7 +128,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateChallengeGoal(targetDays: Int, onNewChallengeCreated: () -> Unit = {}) {
+    fun updateChallengeGoal(targetDays: Int, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             val currentChallenge = getActiveChallengeUseCase().firstOrNull()
             if (currentChallenge != null) {
@@ -137,9 +137,19 @@ class SettingsViewModel @Inject constructor(
             } else {
                 val behavior = preferencesRepository.getChallengeBehavior().firstOrNull() ?: ChallengeBehavior.CONTINUE
                 createChallengeUseCase(targetDays, behavior)
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    onNewChallengeCreated()
-                }
+            }
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                onComplete()
+            }
+        }
+    }
+
+    fun startNewChallenge(targetDays: Int, behavior: ChallengeBehavior, onNewChallengeCreated: () -> Unit = {}) {
+        viewModelScope.launch {
+            preferencesRepository.updateChallengeBehavior(behavior)
+            createChallengeUseCase(targetDays, behavior)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                onNewChallengeCreated()
             }
         }
     }

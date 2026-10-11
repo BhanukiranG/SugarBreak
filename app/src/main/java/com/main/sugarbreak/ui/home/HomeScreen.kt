@@ -169,29 +169,81 @@ fun HomeScreen(
                     CircularProgressIndicator(color = primaryColor)
                 }
             } else if (state.activeChallenge == null) {
+                val completed = state.completedChallenge
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = paddingValues.calculateTopPadding())
+                        .verticalScroll(rememberScrollState())
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = "No active challenge found.",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(
-                        onClick = { showGoalDialog = true },
-                        shape = RoundedCornerShape(percent = 50),
-                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                        modifier = Modifier
-                            .height(54.dp)
-                            .shadow(8.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.35f))
-                    ) {
-                        Text("Start a Challenge", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    if (completed != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(CircleShape)
+                                .background(primaryColor.copy(alpha = 0.15f))
+                                .border(2.dp, primaryColor.copy(alpha = 0.4f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = primaryColor,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "Challenge Completed! 🎉",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Amazing achievement! You completed your ${completed.targetSuccessfulDays}-Day Sugar Break challenge. Ready for your next milestone?",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(28.dp))
+                        Button(
+                            onClick = { showGoalDialog = true },
+                            shape = RoundedCornerShape(percent = 50),
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp)
+                                .shadow(8.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.35f))
+                        ) {
+                            Text("Start Next Challenge", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
+                    } else {
+                        Text(
+                            text = "No active challenge found.",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Begin a supportive habit tracker journey today.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { showGoalDialog = true },
+                            shape = RoundedCornerShape(percent = 50),
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                            modifier = Modifier
+                                .height(54.dp)
+                                .shadow(8.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.35f))
+                        ) {
+                            Text("Start a Challenge", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             } else {
@@ -464,6 +516,9 @@ fun HomeScreen(
         }
 
         if (showGoalDialog) {
+            var selectedDays by remember { mutableStateOf(state.completedChallenge?.targetSuccessfulDays ?: 30) }
+            var selectedRule by remember { mutableStateOf(state.completedChallenge?.behavior ?: com.main.sugarbreak.domain.model.ChallengeBehavior.CONTINUE) }
+
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showGoalDialog = false },
                 properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
@@ -473,7 +528,13 @@ fun HomeScreen(
                         containerColor = Color.Transparent,
                         topBar = {
                             TopAppBar(
-                                title = { },
+                                title = { 
+                                    Text(
+                                        "New Challenge",
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = primaryColor
+                                    )
+                                },
                                 navigationIcon = {
                                     IconButton(onClick = { showGoalDialog = false }) {
                                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -481,6 +542,35 @@ fun HomeScreen(
                                 },
                                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                             )
+                        },
+                        bottomBar = {
+                            androidx.compose.material3.Surface(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = if (isDark) 0.95f else 0.90f),
+                                shadowElevation = 8.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .navigationBarsPadding()
+                                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            viewModel.startNewChallenge(selectedDays, selectedRule)
+                                            showGoalDialog = false
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(50.dp)
+                                            .shadow(8.dp, RoundedCornerShape(50), spotColor = primaryColor.copy(alpha = 0.35f)),
+                                        shape = RoundedCornerShape(50),
+                                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                                    ) {
+                                        Text("Start Challenge", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    }
+                                }
+                            }
                         }
                     ) { paddingValues ->
                         Column(
@@ -490,14 +580,17 @@ fun HomeScreen(
                                 .padding(horizontal = 24.dp)
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            Spacer(Modifier.height(16.dp))
+                            Spacer(Modifier.height(8.dp))
                             com.main.sugarbreak.ui.onboarding.Step4TargetDays(
-                                selectedDays = 30,
-                                onDaysSelected = { 
-                                    viewModel.startNewChallenge(it)
-                                    showGoalDialog = false 
-                                }
+                                selectedDays = selectedDays,
+                                onDaysSelected = { selectedDays = it }
                             )
+                            Spacer(Modifier.height(24.dp))
+                            com.main.sugarbreak.ui.onboarding.Step3Rule(
+                                selectedRule = selectedRule,
+                                onRuleSelected = { selectedRule = it }
+                            )
+                            Spacer(Modifier.height(24.dp))
                         }
                     }
                 }

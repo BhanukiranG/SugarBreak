@@ -11,4 +11,6 @@ interface CheckInRepository {
     fun getCheckInsForChallenge(challengeId: Long): Flow<List<DailyCheckIn>>
     suspend fun getAllCheckInsForChallengeSync(challengeId: Long): List<DailyCheckIn>
     suspend fun deleteAllCheckInsForChallenge(challengeId: Long)
+    suspend fun hasCompletedCheckInForDate(date: LocalDate): Boolean
+    fun getAllCheckIns(): Flow<List<DailyCheckIn>>
 }

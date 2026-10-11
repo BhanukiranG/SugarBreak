@@ -37,6 +37,12 @@ class RecordCheckInUseCaseTest {
         override suspend fun deleteAllCheckInsForChallenge(challengeId: Long) {
             checkIns.removeAll { it.challengeId == challengeId }
         }
+
+        override suspend fun hasCompletedCheckInForDate(date: LocalDate): Boolean {
+            return checkIns.any { it.date == date && it.status != CheckInStatus.PENDING }
+        }
+
+        override fun getAllCheckIns(): Flow<List<DailyCheckIn>> = flowOf(checkIns)
     }
 
     class FakeChallengeRepository : ChallengeRepository {
@@ -97,6 +103,35 @@ class RecordCheckInUseCaseTest {
 
         val updatedChallenge = challengeRepo.challenge!!
         assertEquals(0, updatedChallenge.recoveryDays)
+        assertEquals(ChallengeStatus.COMPLETED, updatedChallenge.status)
+    }
+
+    @Test
+    fun `test challenge completion with CONTINUE rule and slips`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challenge = createChallenge(ChallengeBehavior.CONTINUE, 2)
+        challengeRepo.insert(challenge)
+
+        // Day 1 slip
+        checkInRepo.insert(
+            DailyCheckIn(
+                id = 1,
+                challengeId = challenge.id,
+                date = LocalDate.now().minusDays(1),
+                status = CheckInStatus.SLIP,
+                reason = null,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now()
+            )
+        )
+
+        // Day 2 success (2 total tracked days = target 2)
+        useCase(challenge, CheckInStatus.SUCCESS, null)
+
+        val updatedChallenge = challengeRepo.challenge!!
         assertEquals(ChallengeStatus.COMPLETED, updatedChallenge.status)
     }
 }

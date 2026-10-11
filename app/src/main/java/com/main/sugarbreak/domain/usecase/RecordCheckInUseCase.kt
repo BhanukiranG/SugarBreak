@@ -7,13 +7,15 @@ import com.main.sugarbreak.domain.model.DailyCheckIn
 import com.main.sugarbreak.domain.model.SlipReason
 import com.main.sugarbreak.domain.repository.ChallengeRepository
 import com.main.sugarbreak.domain.repository.CheckInRepository
+import com.main.sugarbreak.notification.NotificationHelper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
 class RecordCheckInUseCase @Inject constructor(
     private val checkInRepository: CheckInRepository,
-    private val challengeRepository: ChallengeRepository
+    private val challengeRepository: ChallengeRepository,
+    private val notificationHelper: NotificationHelper? = null
 ) {
     suspend operator fun invoke(
         challenge: Challenge,
@@ -36,15 +38,25 @@ class RecordCheckInUseCase @Inject constructor(
             checkInRepository.insert(checkIn)
         }
 
+        notificationHelper?.cancelNotification()
+
         val checkIns = checkInRepository.getAllCheckInsForChallengeSync(challenge.id)
         val successfulDays = checkIns.count { it.status == CheckInStatus.SUCCESS }
+        val slipDays = checkIns.count { it.status == CheckInStatus.SLIP }
+        val totalTrackedDays = successfulDays + slipDays
 
         var updatedChallenge = challenge
         if (status == CheckInStatus.SLIP && challenge.behavior == ChallengeBehavior.ADD_RECOVERY_DAY) {
             updatedChallenge = updatedChallenge.copy(recoveryDays = updatedChallenge.recoveryDays + 1)
         }
         
-        if (successfulDays >= challenge.targetSuccessfulDays) {
+        val isCompleted = when (challenge.behavior) {
+            ChallengeBehavior.CONTINUE -> totalTrackedDays >= challenge.targetSuccessfulDays
+            ChallengeBehavior.ADD_RECOVERY_DAY -> successfulDays >= challenge.targetSuccessfulDays
+            ChallengeBehavior.RESET_STREAK -> successfulDays >= challenge.targetSuccessfulDays
+        }
+
+        if (isCompleted) {
             updatedChallenge = updatedChallenge.copy(status = com.main.sugarbreak.domain.model.ChallengeStatus.COMPLETED)
         }
 
