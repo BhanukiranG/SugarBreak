@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -36,23 +37,27 @@ class ReminderReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val hasLoggedToday = checkInRepository.hasCompletedCheckInForDate(java.time.LocalDate.now())
-                if (!hasLoggedToday) {
-                    val challenge = getActiveChallengeUseCase().firstOrNull()
-                    if (challenge != null) {
-                        notificationHelper.showNotification()
-                    }
-                } else {
-                    notificationHelper.cancelNotification()
-                }
-
-                val settings = preferencesRepository.getReminderSettings().first()
-                if (settings.enabled) {
-                    reminderScheduler.schedule(settings.hour, settings.minute)
-                }
+                processReminder()
             } finally {
                 pendingResult.finish()
             }
+        }
+    }
+
+    suspend fun processReminder(today: LocalDate = LocalDate.now()) {
+        val hasLoggedToday = checkInRepository.hasCompletedCheckInForDate(today)
+        if (!hasLoggedToday) {
+            val challenge = getActiveChallengeUseCase().firstOrNull()
+            if (challenge != null) {
+                notificationHelper.showNotification()
+            }
+        } else {
+            notificationHelper.cancelNotification()
+        }
+
+        val settings = preferencesRepository.getReminderSettings().first()
+        if (settings.enabled) {
+            reminderScheduler.schedule(settings.hour, settings.minute)
         }
     }
 

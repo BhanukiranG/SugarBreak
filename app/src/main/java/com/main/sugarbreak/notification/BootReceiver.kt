@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.notification
+package com.main.sugarbreak.notification
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -26,15 +26,21 @@ class BootReceiver : BroadcastReceiver() {
             val pendingResult = goAsync()
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val settings = preferencesRepository.getReminderSettings().first()
-                    if (settings.enabled) {
-                        reminderScheduler.schedule(settings.hour, settings.minute)
-                    }
+                    processIntentAction(intent.action)
                 } catch (e: Exception) {
                     // Ignore or log exceptions
                 } finally {
                     pendingResult.finish()
                 }
+            }
+        }
+    }
+
+    suspend fun processIntentAction(action: String?) {
+        if (action == Intent.ACTION_BOOT_COMPLETED || action == Intent.ACTION_TIMEZONE_CHANGED) {
+            val settings = preferencesRepository.getReminderSettings().first()
+            if (settings.enabled) {
+                reminderScheduler.schedule(settings.hour, settings.minute)
             }
         }
     }

@@ -12,20 +12,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NotificationHelper @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+open class NotificationHelper {
+
+    private val context: Context?
+
+    @Inject
+    constructor(@ApplicationContext context: Context) {
+        this.context = context
+        createNotificationChannel()
+    }
+
+    constructor() {
+        this.context = null
+    }
 
     companion object {
         const val CHANNEL_ID = "sugar_check_in_channel_high_priority"
         const val NOTIFICATION_ID = 1001
     }
 
-    init {
-        createNotificationChannel()
-    }
-
     private fun createNotificationChannel() {
+        val ctx = context ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Sugar Break Check-in"
             val descriptionText = "Daily reminder to log your sugar intake in Sugar Break"
@@ -34,23 +41,24 @@ class NotificationHelper @Inject constructor(
                 description = descriptionText
             }
             val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
 
-    fun showNotification() {
-        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: Intent()
+    open fun showNotification() {
+        val ctx = context ?: return
+        val intent = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName) ?: Intent()
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
-            context,
+            ctx,
             0,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("Sugar Break Check-in")
             .setContentText("It's time to log your sugar intake for today!")
@@ -59,15 +67,13 @@ class NotificationHelper @Inject constructor(
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, builder.build())
     }
 
-    fun cancelNotification() {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    open fun cancelNotification() {
+        val ctx = context ?: return
+        val notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(NOTIFICATION_ID)
     }
 }
-
-
-

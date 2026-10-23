@@ -1,4 +1,4 @@
-﻿package com.main.sugarbreak.notification
+package com.main.sugarbreak.notification
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -25,43 +25,33 @@ class ReminderSchedulerImpl @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            
-            if (timeInMillis <= System.currentTimeMillis()) {
-                add(Calendar.DAY_OF_YEAR, 1)
-            }
-        }
+        val triggerTime = calculateNextAlarmTime(hour, minute)
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setInexactRepeating(
                     AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
+                    triggerTime,
                     AlarmManager.INTERVAL_DAY,
                     pendingIntent
                 )
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
+                    triggerTime,
                     pendingIntent
                 )
             } else {
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
+                    triggerTime,
                     pendingIntent
                 )
             }
         } catch (e: SecurityException) {
             alarmManager.setInexactRepeating(
                 AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
+                triggerTime,
                 AlarmManager.INTERVAL_DAY,
                 pendingIntent
             )
@@ -77,5 +67,22 @@ class ReminderSchedulerImpl @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
+    }
+
+    companion object {
+        fun calculateNextAlarmTime(hour: Int, minute: Int, currentTimeMillis: Long = System.currentTimeMillis()): Long {
+            val calendar = Calendar.getInstance().apply {
+                timeInMillis = currentTimeMillis
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+
+                if (timeInMillis <= currentTimeMillis) {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                }
+            }
+            return calendar.timeInMillis
+        }
     }
 }
