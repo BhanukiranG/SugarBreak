@@ -21,12 +21,27 @@ class RecordCheckInUseCaseTest {
         val checkIns = mutableListOf<DailyCheckIn>()
 
         override suspend fun insert(checkIn: DailyCheckIn) {
-            checkIns.add(checkIn)
+            val idx = checkIns.indexOfFirst { it.challengeId == checkIn.challengeId && it.date == checkIn.date }
+            if (idx != -1) {
+                checkIns[idx] = checkIn
+            } else {
+                val assigned = if (checkIn.id == 0L) checkIn.copy(id = (checkIns.size + 1).toLong()) else checkIn
+                checkIns.add(assigned)
+            }
         }
 
-        override suspend fun update(checkIn: DailyCheckIn) {}
+        override suspend fun update(checkIn: DailyCheckIn) {
+            val idx = checkIns.indexOfFirst { it.id == checkIn.id || (it.challengeId == checkIn.challengeId && it.date == checkIn.date) }
+            if (idx != -1) {
+                checkIns[idx] = checkIn
+            } else {
+                checkIns.add(checkIn)
+            }
+        }
 
-        override suspend fun getCheckInForDate(challengeId: Long, date: LocalDate): DailyCheckIn? = null
+        override suspend fun getCheckInForDate(challengeId: Long, date: LocalDate): DailyCheckIn? {
+            return checkIns.find { it.challengeId == challengeId && it.date == date }
+        }
 
         override fun getCheckInsForChallenge(challengeId: Long): Flow<List<DailyCheckIn>> = flowOf(checkIns)
 
@@ -133,5 +148,89 @@ class RecordCheckInUseCaseTest {
 
         val updatedChallenge = challengeRepo.challenge!!
         assertEquals(ChallengeStatus.COMPLETED, updatedChallenge.status)
+    }
+
+    @Test
+    fun `test edit check-in from SUCCESS to SLIP increases recovery day`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challenge = createChallenge(ChallengeBehavior.ADD_RECOVERY_DAY, 30)
+        challengeRepo.insert(challenge)
+
+        // Initial check-in: Success (earlier in the day)
+        useCase(challenge, CheckInStatus.SUCCESS, null)
+        var updatedChallenge = challengeRepo.challenge!!
+        assertEquals(0, updatedChallenge.recoveryDays)
+
+        // Later in the evening: User ate sugar, edits check-in to SLIP
+        useCase(updatedChallenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.DESSERT)
+        updatedChallenge = challengeRepo.challenge!!
+        assertEquals(1, updatedChallenge.recoveryDays)
+        assertEquals(CheckInStatus.SLIP, checkInRepo.getCheckInForDate(challenge.id, LocalDate.now())?.status)
+        assertEquals(com.main.sugarbreak.domain.model.SlipReason.DESSERT, checkInRepo.getCheckInForDate(challenge.id, LocalDate.now())?.reason)
+    }
+
+    @Test
+    fun `test edit check-in from SLIP to SUCCESS decreases recovery day`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challenge = createChallenge(ChallengeBehavior.ADD_RECOVERY_DAY, 30)
+        challengeRepo.insert(challenge)
+
+        // Initial check-in: Slip
+        useCase(challenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.SWEET)
+        var updatedChallenge = challengeRepo.challenge!!
+        assertEquals(1, updatedChallenge.recoveryDays)
+
+        // User corrects check-in to SUCCESS
+        useCase(updatedChallenge, CheckInStatus.SUCCESS, null)
+        updatedChallenge = challengeRepo.challenge!!
+        assertEquals(0, updatedChallenge.recoveryDays)
+        assertEquals(CheckInStatus.SUCCESS, checkInRepo.getCheckInForDate(challenge.id, LocalDate.now())?.status)
+    }
+
+    @Test
+    fun `test edit check-in reason only does not alter recovery days`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challenge = createChallenge(ChallengeBehavior.ADD_RECOVERY_DAY, 30)
+        challengeRepo.insert(challenge)
+
+        // Initial check-in: Slip with SWEET
+        useCase(challenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.SWEET)
+        var updatedChallenge = challengeRepo.challenge!!
+        assertEquals(1, updatedChallenge.recoveryDays)
+
+        // User updates reason to DESSERT
+        useCase(updatedChallenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.DESSERT)
+        updatedChallenge = challengeRepo.challenge!!
+        assertEquals(1, updatedChallenge.recoveryDays)
+        assertEquals(com.main.sugarbreak.domain.model.SlipReason.DESSERT, checkInRepo.getCheckInForDate(challenge.id, LocalDate.now())?.reason)
+    }
+
+    @Test
+    fun `test edit check-in reverts completed status if success count drops below target`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challenge = createChallenge(ChallengeBehavior.RESET_STREAK, 1) // 1 day target
+        challengeRepo.insert(challenge)
+
+        // Check in SUCCESS completes the 1-day challenge
+        useCase(challenge, CheckInStatus.SUCCESS, null)
+        var updatedChallenge = challengeRepo.challenge!!
+        assertEquals(ChallengeStatus.COMPLETED, updatedChallenge.status)
+
+        // Edit check-in to SLIP at night reverts status to ACTIVE
+        useCase(updatedChallenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.SWEET)
+        updatedChallenge = challengeRepo.challenge!!
+        assertEquals(ChallengeStatus.ACTIVE, updatedChallenge.status)
     }
 }

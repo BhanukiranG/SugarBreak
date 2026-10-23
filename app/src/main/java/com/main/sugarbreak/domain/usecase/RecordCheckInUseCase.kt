@@ -45,9 +45,19 @@ class RecordCheckInUseCase @Inject constructor(
         val slipDays = checkIns.count { it.status == CheckInStatus.SLIP }
         val totalTrackedDays = successfulDays + slipDays
 
+        val wasSlip = existing?.status == CheckInStatus.SLIP
+        val isSlip = status == CheckInStatus.SLIP
+        val recoveryDiff = when {
+            !wasSlip && isSlip -> 1
+            wasSlip && !isSlip -> -1
+            else -> 0
+        }
+
         var updatedChallenge = challenge
-        if (status == CheckInStatus.SLIP && challenge.behavior == ChallengeBehavior.ADD_RECOVERY_DAY) {
-            updatedChallenge = updatedChallenge.copy(recoveryDays = updatedChallenge.recoveryDays + 1)
+        if (challenge.behavior == ChallengeBehavior.ADD_RECOVERY_DAY && recoveryDiff != 0) {
+            updatedChallenge = updatedChallenge.copy(
+                recoveryDays = maxOf(0, updatedChallenge.recoveryDays + recoveryDiff)
+            )
         }
         
         val isCompleted = when (challenge.behavior) {
@@ -56,9 +66,12 @@ class RecordCheckInUseCase @Inject constructor(
             ChallengeBehavior.RESET_STREAK -> successfulDays >= challenge.targetSuccessfulDays
         }
 
-        if (isCompleted) {
-            updatedChallenge = updatedChallenge.copy(status = com.main.sugarbreak.domain.model.ChallengeStatus.COMPLETED)
+        val newChallengeStatus = if (isCompleted) {
+            com.main.sugarbreak.domain.model.ChallengeStatus.COMPLETED
+        } else {
+            com.main.sugarbreak.domain.model.ChallengeStatus.ACTIVE
         }
+        updatedChallenge = updatedChallenge.copy(status = newChallengeStatus)
 
         if (updatedChallenge != challenge) {
             challengeRepository.update(updatedChallenge)

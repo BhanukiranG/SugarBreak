@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,6 +83,7 @@ import java.util.Locale
 @Composable
 fun HistoryScreen(
     onNavigateToUserDetails: () -> Unit = {},
+    onNavigateToCheckIn: () -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -401,7 +403,8 @@ fun HistoryScreen(
                                                     .size(38.dp)
                                                     .clip(CircleShape)
                                                     .background(cellBg)
-                                                    .then(borderModifier),
+                                                    .then(borderModifier)
+                                                    .then(if (isToday) Modifier.clickable { onNavigateToCheckIn() } else Modifier),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Column(

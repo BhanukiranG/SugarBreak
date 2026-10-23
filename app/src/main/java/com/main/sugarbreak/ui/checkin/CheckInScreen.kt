@@ -105,6 +105,18 @@ fun CheckInScreen(
     var selectedTreatIndex by remember { mutableStateOf<Int?>(null) }
     var selectedTrigger by remember { mutableStateOf("stress") }
 
+    LaunchedEffect(uiState.selectedReason) {
+        if (selectedTreatIndex == null && uiState.selectedReason != null) {
+            selectedTreatIndex = when (uiState.selectedReason) {
+                SlipReason.SWEET -> 0
+                SlipReason.SUGARY_DRINK -> 1
+                SlipReason.DESSERT -> 2
+                SlipReason.OTHER -> 4
+                else -> 0
+            }
+        }
+    }
+
     val treatOptions = listOf(
         Pair("Pastry / Bakery", Icons.Default.BakeryDining),
         Pair("Soda / Sweet Drink", Icons.Default.LocalCafe),
@@ -156,7 +168,7 @@ fun CheckInScreen(
 
                     // Screen Title
                     Text(
-                        text = "Daily Check In",
+                        text = if (uiState.isEditing) "Edit Daily Check In" else "Daily Check In",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -201,7 +213,7 @@ fun CheckInScreen(
                         .padding(horizontal = 20.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "How was today?",
+                        text = if (uiState.isEditing) "Update today's check-in" else "How was today?",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
@@ -212,7 +224,7 @@ fun CheckInScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Be honest.",
+                        text = if (uiState.isEditing) "Ate sugar tonight? You can adjust your check-in anytime before midnight." else "Be honest.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -634,7 +646,7 @@ fun CheckInScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Log Today",
+                            text = if (uiState.isEditing) "Update Check-in" else "Log Today",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (canSubmit) Color.White else MaterialTheme.colorScheme.outline
