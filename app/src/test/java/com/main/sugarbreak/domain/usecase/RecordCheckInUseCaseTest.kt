@@ -77,10 +77,14 @@ class RecordCheckInUseCaseTest {
         override fun getAllChallenges(): Flow<List<Challenge>> = flowOf(listOfNotNull(challenge))
     }
 
-    private fun createChallenge(behavior: ChallengeBehavior, target: Int = 30): Challenge {
+    private fun createChallenge(
+        behavior: ChallengeBehavior,
+        target: Int = 30,
+        startDate: LocalDate = LocalDate.now()
+    ): Challenge {
         return Challenge(
             id = 1L,
-            startDate = LocalDate.now(),
+            startDate = startDate,
             targetSuccessfulDays = target,
             recoveryDays = 0,
             status = ChallengeStatus.ACTIVE,
@@ -232,5 +236,98 @@ class RecordCheckInUseCaseTest {
         useCase(updatedChallenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.SWEET)
         updatedChallenge = challengeRepo.challenge!!
         assertEquals(ChallengeStatus.ACTIVE, updatedChallenge.status)
+    }
+
+    @Test
+    fun `test record check-in on previous day within challenge period`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challengeStartDate = LocalDate.now().minusDays(5)
+        val targetPreviousDate = LocalDate.now().minusDays(3)
+        val challenge = createChallenge(ChallengeBehavior.CONTINUE, 30, startDate = challengeStartDate)
+        challengeRepo.insert(challenge)
+
+        useCase(challenge, CheckInStatus.SUCCESS, null, date = targetPreviousDate)
+
+        val recorded = checkInRepo.getCheckInForDate(challenge.id, targetPreviousDate)
+        org.junit.Assert.assertNotNull(recorded)
+        assertEquals(CheckInStatus.SUCCESS, recorded?.status)
+        assertEquals(targetPreviousDate, recorded?.date)
+    }
+
+    @Test
+    fun `test edit previous day check-in from SLIP to SUCCESS updates recovery days`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challengeStartDate = LocalDate.now().minusDays(5)
+        val pastDate = LocalDate.now().minusDays(2)
+        val challenge = createChallenge(ChallengeBehavior.ADD_RECOVERY_DAY, 30, startDate = challengeStartDate)
+        challengeRepo.insert(challenge)
+
+        // Day in past was a slip
+        useCase(challenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.SWEET, date = pastDate)
+        var updatedChallenge = challengeRepo.challenge!!
+        assertEquals(1, updatedChallenge.recoveryDays)
+
+        // Edit past day to SUCCESS
+        useCase(updatedChallenge, CheckInStatus.SUCCESS, null, date = pastDate)
+        updatedChallenge = challengeRepo.challenge!!
+        assertEquals(0, updatedChallenge.recoveryDays)
+        assertEquals(CheckInStatus.SUCCESS, checkInRepo.getCheckInForDate(challenge.id, pastDate)?.status)
+    }
+
+    @Test
+    fun `test edit previous day check-in from SUCCESS to SLIP increases recovery days`() = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challengeStartDate = LocalDate.now().minusDays(5)
+        val pastDate = LocalDate.now().minusDays(2)
+        val challenge = createChallenge(ChallengeBehavior.ADD_RECOVERY_DAY, 30, startDate = challengeStartDate)
+        challengeRepo.insert(challenge)
+
+        // Day in past was success
+        useCase(challenge, CheckInStatus.SUCCESS, null, date = pastDate)
+        var updatedChallenge = challengeRepo.challenge!!
+        assertEquals(0, updatedChallenge.recoveryDays)
+
+        // Edit past day to SLIP
+        useCase(updatedChallenge, CheckInStatus.SLIP, com.main.sugarbreak.domain.model.SlipReason.SWEET, date = pastDate)
+        updatedChallenge = challengeRepo.challenge!!
+        assertEquals(1, updatedChallenge.recoveryDays)
+        assertEquals(CheckInStatus.SLIP, checkInRepo.getCheckInForDate(challenge.id, pastDate)?.status)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `test recording check-in before challenge start date throws IllegalArgumentException`(): Unit = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challengeStartDate = LocalDate.now().minusDays(3)
+        val invalidPastDate = challengeStartDate.minusDays(1)
+        val challenge = createChallenge(ChallengeBehavior.CONTINUE, 30, startDate = challengeStartDate)
+        challengeRepo.insert(challenge)
+
+        useCase(challenge, CheckInStatus.SUCCESS, null, date = invalidPastDate)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `test recording check-in for future date throws IllegalArgumentException`(): Unit = runBlocking {
+        val checkInRepo = FakeCheckInRepository()
+        val challengeRepo = FakeChallengeRepository()
+        val useCase = RecordCheckInUseCase(checkInRepo, challengeRepo)
+
+        val challengeStartDate = LocalDate.now().minusDays(3)
+        val futureDate = LocalDate.now().plusDays(1)
+        val challenge = createChallenge(ChallengeBehavior.CONTINUE, 30, startDate = challengeStartDate)
+        challengeRepo.insert(challenge)
+
+        useCase(challenge, CheckInStatus.SUCCESS, null, date = futureDate)
     }
 }

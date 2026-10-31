@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BakeryDining
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.EnergySavingsLeaf
 import androidx.compose.material.icons.filled.Favorite
@@ -98,8 +100,14 @@ fun CheckInScreen(
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
     val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer
 
-    val todayDateFormatted = remember {
-        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
+    val today = remember { LocalDate.now() }
+    val isToday = uiState.selectedDate == today
+    val formattedDateText = remember(uiState.selectedDate) {
+        when {
+            uiState.selectedDate == today -> "Today, " + today.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
+            uiState.selectedDate == today.minusDays(1) -> "Yesterday, " + uiState.selectedDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
+            else -> uiState.selectedDate.format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault()))
+        }
     }
 
     var selectedTreatIndex by remember { mutableStateOf<Int?>(null) }
@@ -173,34 +181,81 @@ fun CheckInScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    // Date Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(
-                                if (isDark) Color(0xFF1A2738).copy(alpha = 0.6f)
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                            )
-                            .border(
-                                1.dp,
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                                RoundedCornerShape(50)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    // Date Pill with Steppers
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = null,
-                                tint = primaryColor,
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Today, $todayDateFormatted",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        if (uiState.canNavigatePreviousDate) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isDark) Color(0xFF1A2738).copy(alpha = 0.6f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                    .clickable { viewModel.onPreviousDate() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronLeft,
+                                    contentDescription = "Previous Day",
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(
+                                    if (isDark) Color(0xFF1A2738).copy(alpha = 0.6f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                )
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                    RoundedCornerShape(50)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = null,
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = formattedDateText,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        if (uiState.canNavigateNextDate) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isDark) Color(0xFF1A2738).copy(alpha = 0.6f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                    .clickable { viewModel.onNextDate() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = "Next Day",
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -212,8 +267,38 @@ fun CheckInScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 8.dp)
                 ) {
+                    if (uiState.remainingCatchUpDays > 0 && !uiState.isEditing && !isToday) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(tertiaryColor.copy(alpha = if (isDark) 0.20f else 0.12f))
+                                .border(1.dp, tertiaryColor.copy(alpha = 0.35f), RoundedCornerShape(50))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Catching up: ${uiState.remainingCatchUpDays} missed ${if (uiState.remainingCatchUpDays == 1) "day" else "days"} remaining",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = tertiaryColor
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                    val headlineText = if (uiState.isEditing) {
+                        if (isToday) "Update today's check-in" else "Update check-in"
+                    } else {
+                        if (isToday) "How was today?" else "How was ${uiState.selectedDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))}?"
+                    }
+
+                    val subtitleText = if (uiState.isEditing) {
+                        if (isToday) "Ate sugar tonight? You can adjust your check-in anytime before midnight."
+                        else "Update this entry to keep your habit streak and history accurate."
+                    } else {
+                        if (isToday) "Be honest with yourself. Every day is a mindful step."
+                        else "Log your entry to keep your sugar break journey complete."
+                    }
+
                     Text(
-                        text = if (uiState.isEditing) "Update today's check-in" else "How was today?",
+                        text = headlineText,
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
@@ -224,7 +309,7 @@ fun CheckInScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = if (uiState.isEditing) "Ate sugar tonight? You can adjust your check-in anytime before midnight." else "Be honest.",
+                        text = subtitleText,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -646,7 +731,7 @@ fun CheckInScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (uiState.isEditing) "Update Check-in" else "Log Today",
+                            text = if (uiState.isEditing) "Update Check-in" else if (isToday) "Log Today" else "Log Check-in",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (canSubmit) Color.White else MaterialTheme.colorScheme.outline

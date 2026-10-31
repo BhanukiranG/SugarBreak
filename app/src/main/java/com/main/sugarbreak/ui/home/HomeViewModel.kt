@@ -8,6 +8,7 @@ import com.main.sugarbreak.domain.model.StreakSummary
 import com.main.sugarbreak.domain.usecase.CalculateStreakUseCase
 import com.main.sugarbreak.domain.usecase.GetActiveChallengeUseCase
 import com.main.sugarbreak.domain.usecase.GetTodayCheckInUseCase
+import com.main.sugarbreak.domain.usecase.GetUnloggedPastDaysUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 data class HomeState(
@@ -26,6 +28,7 @@ data class HomeState(
     val completedChallenge: Challenge? = null,
     val streakSummary: StreakSummary? = null,
     val todayCheckIn: DailyCheckIn? = null,
+    val unloggedPastDays: List<LocalDate> = emptyList(),
     val userName: String = "Local Profile",
     val isLoading: Boolean = true
 )
@@ -35,6 +38,7 @@ class HomeViewModel @Inject constructor(
     private val getActiveChallengeUseCase: GetActiveChallengeUseCase,
     private val calculateStreakUseCase: CalculateStreakUseCase,
     private val getTodayCheckInUseCase: GetTodayCheckInUseCase,
+    private val getUnloggedPastDaysUseCase: GetUnloggedPastDaysUseCase,
     private val preferencesRepository: com.main.sugarbreak.domain.repository.PreferencesRepository,
     private val challengeRepository: com.main.sugarbreak.domain.repository.ChallengeRepository,
     private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
@@ -60,13 +64,15 @@ class HomeViewModel @Inject constructor(
             if (challenge != null) {
                 combine(
                     calculateStreakUseCase(challenge.id),
-                    getTodayCheckInUseCase(challenge.id)
-                ) { streak, checkIn ->
+                    getTodayCheckInUseCase(challenge.id),
+                    getUnloggedPastDaysUseCase()
+                ) { streak, checkIn, unloggedDays ->
                     HomeState(
                         activeChallenge = challenge,
                         completedChallenge = null,
                         streakSummary = streak,
                         todayCheckIn = checkIn,
+                        unloggedPastDays = unloggedDays,
                         userName = userName,
                         isLoading = false
                     )

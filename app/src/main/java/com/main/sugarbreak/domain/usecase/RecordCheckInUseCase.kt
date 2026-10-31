@@ -20,13 +20,21 @@ class RecordCheckInUseCase @Inject constructor(
     suspend operator fun invoke(
         challenge: Challenge,
         status: CheckInStatus,
-        reason: SlipReason? = null
+        reason: SlipReason? = null,
+        date: LocalDate = LocalDate.now()
     ) {
-        val existing = checkInRepository.getCheckInForDate(challenge.id, LocalDate.now())
+        require(!date.isBefore(challenge.startDate)) {
+            "Cannot record check-in before challenge start date (${challenge.startDate})"
+        }
+        require(!date.isAfter(LocalDate.now())) {
+            "Cannot record check-in for future date ($date)"
+        }
+
+        val existing = checkInRepository.getCheckInForDate(challenge.id, date)
         val checkIn = DailyCheckIn(
             id = existing?.id ?: 0,
             challengeId = challenge.id,
-            date = LocalDate.now(),
+            date = date,
             status = status,
             reason = reason,
             createdAt = existing?.createdAt ?: LocalDateTime.now(),
@@ -38,7 +46,9 @@ class RecordCheckInUseCase @Inject constructor(
             checkInRepository.insert(checkIn)
         }
 
-        notificationHelper?.cancelNotification()
+        if (date == LocalDate.now()) {
+            notificationHelper?.cancelNotification()
+        }
 
         val checkIns = checkInRepository.getAllCheckInsForChallengeSync(challenge.id)
         val successfulDays = checkIns.count { it.status == CheckInStatus.SUCCESS }

@@ -83,7 +83,7 @@ import java.util.Locale
 @Composable
 fun HistoryScreen(
     onNavigateToUserDetails: () -> Unit = {},
-    onNavigateToCheckIn: () -> Unit = {},
+    onNavigateToCheckIn: (LocalDate) -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -357,6 +357,7 @@ fun HistoryScreen(
                             // Days Grid
                             val totalSlots = 35 // 5 rows x 7 columns
                             val offset = firstDayOfWeek - 1 // 0 for Monday
+                            val challenge = uiState.challenge
 
                             for (row in 0 until 5) {
                                 Row(
@@ -373,6 +374,7 @@ fun HistoryScreen(
                                             val record = recordsMap[date]
                                             val isToday = date == today
                                             val isFuture = date.isAfter(today)
+                                            val isWithinChallenge = challenge != null && !date.isBefore(challenge.startDate) && !isFuture
 
                                             val status = record?.status
 
@@ -395,6 +397,7 @@ fun HistoryScreen(
                                                 isToday -> Modifier.border(2.dp, primaryColor.copy(alpha = pulseAlpha), CircleShape)
                                                 isFuture -> Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), CircleShape)
                                                 status == CheckInStatus.SLIP -> Modifier.border(1.dp, tertiaryContainer.copy(alpha = 0.4f), CircleShape)
+                                                isWithinChallenge && status == null -> Modifier.border(1.dp, primaryColor.copy(alpha = 0.35f), CircleShape)
                                                 else -> Modifier
                                             }
 
@@ -404,7 +407,7 @@ fun HistoryScreen(
                                                     .clip(CircleShape)
                                                     .background(cellBg)
                                                     .then(borderModifier)
-                                                    .then(if (isToday) Modifier.clickable { onNavigateToCheckIn() } else Modifier),
+                                                    .then(if (isWithinChallenge) Modifier.clickable { onNavigateToCheckIn(date) } else Modifier),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Column(
@@ -517,6 +520,17 @@ fun HistoryScreen(
                                     Text("Upcoming", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
+
+                            if (challenge != null) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "💡 Tap any day since your sugar cut began to view, edit, or log past entries.",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                     }
 
@@ -526,10 +540,3 @@ fun HistoryScreen(
         }
     }
 }
-
-
-
-
-
-
-
