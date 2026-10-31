@@ -203,7 +203,7 @@ fun HomeScreen(
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "Challenge Completed! ðŸŽ‰",
+                            text = "Challenge Completed!",
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onBackground,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -647,8 +647,23 @@ fun HomeScreen(
 
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showGoalDialog = false },
-                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+                properties = androidx.compose.ui.window.DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false
+                )
             ) {
+                val dialogWindow = (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                    ?: (androidx.compose.ui.platform.LocalView.current as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                androidx.compose.runtime.SideEffect {
+                    dialogWindow?.let { win ->
+                        win.setLayout(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        win.addFlags(android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                    }
+                }
+
                 SugarBackground {
                     Scaffold(
                         containerColor = Color.Transparent,
@@ -662,11 +677,28 @@ fun HomeScreen(
                                     )
                                 },
                                 navigationIcon = {
-                                    IconButton(onClick = { showGoalDialog = false }) {
-                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(start = 12.dp)
+                                            .size(40.dp)
+                                            .clip(CircleShape)
+                                            .background(if (isDark) Color(0xFF131C26).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.85f))
+                                            .border(1.dp, if (isDark) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.90f), CircleShape)
+                                            .clickable { showGoalDialog = false },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Back",
+                                            tint = primaryColor,
+                                            modifier = Modifier.size(20.dp)
+                                        )
                                     }
                                 },
-                                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = if (isDark) Color(0xFF0B0F17).copy(alpha = 0.85f)
+                                    else Color.White.copy(alpha = 0.82f)
+                                )
                             )
                         },
                         bottomBar = {
@@ -679,7 +711,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .navigationBarsPadding()
-                                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                                        .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 28.dp)
                                 ) {
                                     Button(
                                         onClick = {

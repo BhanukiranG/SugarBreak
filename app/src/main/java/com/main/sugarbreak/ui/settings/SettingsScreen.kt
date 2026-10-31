@@ -473,8 +473,20 @@ fun SettingsScreen(
         if (showRuleDialog) {
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showRuleDialog = false },
-                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
             ) {
+                val dialogWindow = (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                    ?: (androidx.compose.ui.platform.LocalView.current as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                androidx.compose.runtime.SideEffect {
+                    dialogWindow?.let { win ->
+                        win.setLayout(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        win.addFlags(android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                    }
+                }
+
                 SugarBackground {
                     Scaffold(
                         containerColor = Color.Transparent,
@@ -519,8 +531,20 @@ fun SettingsScreen(
 
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = { showGoalDialog = false },
-                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
             ) {
+                val dialogWindow = (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                    ?: (androidx.compose.ui.platform.LocalView.current as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                androidx.compose.runtime.SideEffect {
+                    dialogWindow?.let { win ->
+                        win.setLayout(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        win.addFlags(android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                    }
+                }
+
                 SugarBackground {
                     Scaffold(
                         containerColor = Color.Transparent,
@@ -551,7 +575,7 @@ fun SettingsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .navigationBarsPadding()
-                                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                                        .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 28.dp)
                                 ) {
                                     Button(
                                         onClick = {
