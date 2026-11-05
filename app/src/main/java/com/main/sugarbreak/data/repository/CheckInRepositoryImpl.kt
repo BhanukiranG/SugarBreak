@@ -47,9 +47,12 @@ class CheckInRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteAllCheckInsForChallenge(challengeId: Long) {
-        val uid = ownerUidOrSignedOut()
-        dailyCheckInDao.deleteAllCheckInsForChallenge(challengeId, uid)
-        if (uid != "__signed_out__") progressSyncRepository.schedule(uid)
+        val uid = authenticationRepository.currentUserSnapshot()?.uid
+            ?: error("An authenticated account is required to reset progress")
+        val challenge = challengeDao.getChallengeById(challengeId, uid)
+            ?: error("Challenge not found for the signed-in account")
+        dailyCheckInDao.resetCheckInsForChallenge(challengeId, uid, challenge.syncId)
+        progressSyncRepository.schedule(uid)
     }
 
     override suspend fun hasCompletedCheckInForDate(date: LocalDate): Boolean {

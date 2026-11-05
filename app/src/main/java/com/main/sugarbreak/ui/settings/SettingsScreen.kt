@@ -62,7 +62,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,7 +85,6 @@ import com.main.sugarbreak.ui.components.SugarBackground
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +97,6 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
@@ -416,20 +413,25 @@ fun SettingsScreen(
                         }
                     }
                     OutlinedButton(
-                        onClick = {
-                            val credentialManager = androidx.credentials.CredentialManager.create(context)
-                            coroutineScope.launch {
-                                runCatching {
-                                    credentialManager.clearCredentialState(
-                                        androidx.credentials.ClearCredentialStateRequest()
-                                    )
-                                }
-                                viewModel.signOut()
-                            }
-                        },
+                        onClick = viewModel::signOut,
+                        enabled = !uiState.isSigningOut,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Sign out")
+                        if (uiState.isSigningOut) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text("Signing out…")
+                            }
+                        } else {
+                            Text("Sign out")
+                        }
+                    }
+                    uiState.signOutError?.let { error ->
+                        Text(error, color = MaterialTheme.colorScheme.error)
                     }
                     // App Version Footer
                     Column(

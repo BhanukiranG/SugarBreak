@@ -10,10 +10,11 @@ import com.main.sugarbreak.data.local.dao.ChallengeDao
 import com.main.sugarbreak.data.local.dao.DailyCheckInDao
 import com.main.sugarbreak.data.local.entity.ChallengeEntity
 import com.main.sugarbreak.data.local.entity.DailyCheckInEntity
+import com.main.sugarbreak.data.local.entity.PendingCheckInResetEntity
 
 @Database(
-    entities = [ChallengeEntity::class, DailyCheckInEntity::class],
-    version = 3,
+    entities = [ChallengeEntity::class, DailyCheckInEntity::class, PendingCheckInResetEntity::class],
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -36,6 +37,18 @@ abstract class SugarBreakDatabase : RoomDatabase() {
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_daily_check_ins_ownerUid_challengeId_date ON daily_check_ins(ownerUid, challengeId, date)")
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_challenges_ownerUid_syncId ON challenges(ownerUid, syncId)")
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_daily_check_ins_ownerUid_syncId ON daily_check_ins(ownerUid, syncId)")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS pending_checkin_resets (" +
+                        "ownerUid TEXT NOT NULL, " +
+                        "challengeSyncId TEXT NOT NULL, " +
+                        "requestedAt TEXT NOT NULL, " +
+                        "PRIMARY KEY(ownerUid, challengeSyncId))"
+                )
             }
         }
     }

@@ -5,16 +5,22 @@ import com.main.sugarbreak.data.local.dao.ChallengeDao
 import com.main.sugarbreak.data.local.dao.DailyCheckInDao
 import com.main.sugarbreak.data.local.entity.ChallengeEntity
 import com.main.sugarbreak.data.local.entity.DailyCheckInEntity
+import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.data.preferences.PreferencesManager
+import com.main.sugarbreak.domain.repository.AuthenticationRepository
 import com.main.sugarbreak.domain.repository.ProgressSyncRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -25,15 +31,35 @@ class FirestoreProgressSyncRepository @Inject constructor(
     private val services: FirebaseServices,
     private val challengeDao: ChallengeDao,
     private val checkInDao: DailyCheckInDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val authenticationRepository: AuthenticationRepository
 ) : ProgressSyncRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val syncMutex = Mutex()
+    private val syncRequests = ConcurrentHashMap<String, Channel<Unit>>()
 
     override fun schedule(uid: String) {
-        scope.launch {
-            runCatching { syncNow(uid) }
+        val requests = syncRequests.computeIfAbsent(uid) { accountUid ->
+            Channel<Unit>(Channel.CONFLATED).also { channel ->
+                scope.launch {
+                    for (ignored in channel) {
+                        var retryDelay = 1_000L
+                        while (authenticationRepository.currentUserSnapshot()?.uid == accountUid) {
+                            try {
+                                syncNow(accountUid)
+                                break
+                            } catch (cancelled: CancellationException) {
+                                throw cancelled
+                            } catch (_: Exception) {
+                                delay(retryDelay)
+                                retryDelay = (retryDelay * 2).coerceAtMost(60_000L)
+                            }
+                        }
+                    }
+                }
+            }
         }
+        requests.trySend(Unit)
     }
 
     override suspend fun syncNow(uid: String) {
@@ -41,16 +67,27 @@ class FirestoreProgressSyncRepository @Inject constructor(
     }
 
     private suspend fun syncInternal(uid: String) {
+        preferencesManager.claimLegacyOnboarding(uid)
+        preferencesManager.claimLegacyChallengeBehavior(uid)
         val firestore = services.firestore ?: return
         challengeDao.claimLegacyChallenges(uid)
         checkInDao.claimLegacyCheckIns(uid)
         preferencesManager.claimLegacyUserName(uid)
 
         val user = firestore.collection("users").document(uid)
+        val remoteProfile = user.get().await()
         val localChallenges = challengeDao.getAllChallengesSync(uid)
-        val remoteChallenges = user.collection("challenges").get().await().documents.mapNotNull {
+        val remoteChallengeSnapshot = user.collection("challenges").get().await()
+        val remoteChallenges = remoteChallengeSnapshot.documents.mapNotNull {
             it.toChallenge(uid)
         }
+        val localOnboarding = preferencesManager.onboardingCompleted(uid).first()
+        val onboardingCompleted = resolveOnboardingCompletion(
+            localCompletion = localOnboarding,
+            remoteCompletion = remoteProfile.getBoolean("onboardingCompleted"),
+            hasRemoteChallenges = !remoteChallengeSnapshot.isEmpty
+        )
+        preferencesManager.setOnboardingCompleted(uid, onboardingCompleted)
         val newestChallenges = mergeByNewest(
             localChallenges,
             remoteChallenges,
@@ -67,13 +104,64 @@ class FirestoreProgressSyncRepository @Inject constructor(
             }
         }
         val savedChallenges = challengeDao.getAllChallengesSync(uid)
+        val pendingResets = checkInDao.getPendingChallengeResets(uid)
+        val pendingResetCutoffs = pendingResets.associate { it.challengeSyncId to it.requestedAt }
+        pendingResets.forEach { reset ->
+            val localChallenge = savedChallenges.firstOrNull { it.syncId == reset.challengeSyncId } ?: return@forEach
+            val staleCheckInIds = checkInDao.getAllCheckInsForChallengeSync(localChallenge.id, uid)
+                .filter { !it.createdAt.isAfter(reset.requestedAt) }
+                .map { it.id }
+            staleCheckInIds.chunked(900).forEach { ids -> checkInDao.deleteCheckInsByIds(uid, ids) }
+        }
         val localChecksRaw = checkInDao.getAllCheckInsSync(uid)
         val localChecks = localChecksRaw.map { record ->
             val challengeSyncId = savedChallenges.firstOrNull { it.id == record.challengeId }?.syncId.orEmpty()
             record.copy(syncId = "${challengeSyncId}_${record.date}")
         }
-        val remoteChecks = user.collection("checkIns").get().await().documents.mapNotNull { doc ->
-            doc.toCheckIn(uid, savedChallenges)
+        val remoteCheckInSnapshot = user.collection("checkIns").get().await()
+        val resetDocuments = remoteCheckInSnapshot.documents.filter { document ->
+            isCheckInSuppressedByPendingReset(
+                challengeSyncId = document.getString("challengeSyncId"),
+                createdAt = document.getString("createdAt")?.let { raw ->
+                    runCatching { LocalDateTime.parse(raw) }.getOrNull()
+                },
+                pendingResetCutoffs = pendingResetCutoffs
+            )
+        }
+        resetDocuments.chunked(400).forEach { documents ->
+            val deletionBatch = firestore.batch()
+            documents.forEach { deletionBatch.delete(it.reference) }
+            deletionBatch.commit().await()
+        }
+        if (!remoteCheckInSnapshot.metadata.isFromCache) {
+            pendingResets.forEach { reset ->
+                checkInDao.removePendingChallengeReset(uid, reset.challengeSyncId)
+            }
+        }
+        val remoteChecks = remoteCheckInSnapshot.documents
+            .filterNot {
+                isCheckInSuppressedByPendingReset(
+                    challengeSyncId = it.getString("challengeSyncId"),
+                    createdAt = it.getString("createdAt")?.let { raw ->
+                        runCatching { LocalDateTime.parse(raw) }.getOrNull()
+                    },
+                    pendingResetCutoffs = pendingResetCutoffs
+                )
+            }
+            .mapNotNull { doc -> doc.toCheckIn(uid, savedChallenges) }
+
+        val localBehavior = preferencesManager.challengeBehavior(uid).first()
+        val remoteBehavior = remoteProfile.getString("challengeBehavior")
+            ?.takeIf { raw -> runCatching { ChallengeBehavior.valueOf(raw) }.isSuccess }
+        val remoteBehaviorUpdatedAt = remoteProfile.getLong("challengeBehaviorUpdatedAt") ?: 0L
+        val resolvedBehavior = resolveChallengeBehavior(
+            localValue = localBehavior?.value,
+            localUpdatedAt = localBehavior?.updatedAt ?: 0L,
+            remoteValue = remoteBehavior,
+            remoteUpdatedAt = remoteBehaviorUpdatedAt
+        )
+        resolvedBehavior?.let { (value, updatedAt) ->
+            preferencesManager.setChallengeBehavior(uid, value, updatedAt)
         }
         val mergedChecks = mergeByNewest(
             localChecks,
@@ -90,18 +178,24 @@ class FirestoreProgressSyncRepository @Inject constructor(
             if (existing != checkIn) checkInDao.insert(checkIn)
         }
 
-        val remoteName = user.get().await().getString("displayName")
-        val currentName = preferencesManager.userName(uid).first()
-        val displayName = when {
-            currentName.isNullOrBlank() || currentName == "Local Profile" -> remoteName.orEmpty()
-            else -> currentName
-        }
-        if (!remoteName.isNullOrBlank() && (currentName.isNullOrBlank() || currentName == "Local Profile")) {
-            preferencesManager.setUserName(uid, remoteName)
-        }
+        val localName = preferencesManager.userName(uid).first()
+        val resolvedName = resolveTimestampedValue(
+            localValue = localName?.value?.takeUnless { it == "Local Profile" },
+            localUpdatedAt = localName?.updatedAt ?: 0L,
+            remoteValue = remoteProfile.getString("displayName")?.takeUnless { it.isBlank() },
+            remoteUpdatedAt = remoteProfile.getLong("displayNameUpdatedAt") ?: 0L
+        )
+        resolvedName?.let { (value, updatedAt) -> preferencesManager.setUserName(uid, value, updatedAt) }
 
         val writes = mutableListOf<Pair<com.google.firebase.firestore.DocumentReference, Map<String, Any?>>>()
-        writes += user to mapOf("displayName" to displayName, "updatedAt" to System.currentTimeMillis())
+        writes += user to mapOf(
+            "displayName" to resolvedName?.first.orEmpty(),
+            "displayNameUpdatedAt" to resolvedName?.second,
+            "onboardingCompleted" to onboardingCompleted,
+            "challengeBehavior" to resolvedBehavior?.first,
+            "challengeBehaviorUpdatedAt" to resolvedBehavior?.second,
+            "updatedAt" to System.currentTimeMillis()
+        )
         mergedChallenges.filter { challenge ->
             val remote = remoteChallenges.firstOrNull { it.syncId == challenge.syncId }
             val local = localChallenges.firstOrNull { it.syncId == challenge.syncId }

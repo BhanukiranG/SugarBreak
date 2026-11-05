@@ -1,18 +1,24 @@
 package com.main.sugarbreak.data.repository
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.main.sugarbreak.data.firebase.FirebaseServices
 import com.main.sugarbreak.domain.model.AuthenticatedUser
 import com.main.sugarbreak.domain.repository.AuthenticationRepository
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FirebaseAuthenticationRepository @Inject constructor(
-    private val firebaseServices: FirebaseServices
+    private val firebaseServices: FirebaseServices,
+    @ApplicationContext private val context: Context
 ) : AuthenticationRepository {
     private val auth: FirebaseAuth? get() = firebaseServices.auth
     override val currentUser: Flow<AuthenticatedUser?> = callbackFlow {
@@ -59,6 +65,13 @@ class FirebaseAuthenticationRepository @Inject constructor(
     }
 
     override suspend fun signOut() {
+        try {
+            CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest())
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // Credential cleanup is best effort; still clear the Firebase session.
+        }
         requireAuth().signOut()
     }
 
