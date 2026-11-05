@@ -52,6 +52,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -410,6 +411,27 @@ fun SettingsScreen(
                                 )
                             }
                         }
+                    }
+                    OutlinedButton(
+                        onClick = viewModel::signOut,
+                        enabled = !uiState.isSigningOut,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (uiState.isSigningOut) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text("Signing out…")
+                            }
+                        } else {
+                            Text("Sign out")
+                        }
+                    }
+                    uiState.signOutError?.let { error ->
+                        Text(error, color = MaterialTheme.colorScheme.error)
                     }
                     // App Version Footer
                     Column(

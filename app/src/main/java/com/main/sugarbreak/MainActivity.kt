@@ -5,8 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.main.sugarbreak.ui.navigation.AppNavGraph
@@ -28,10 +32,20 @@ class MainActivity : ComponentActivity() {
                 appTheme = appTheme
             ) {
                 if (startDestination != null) {
-                    AppNavGraph(
+                    key(startDestination) {
+                        AppNavGraph(
+                            modifier = Modifier.fillMaxSize(),
+                            startDestination = startDestination!!,
+                            onAuthenticated = mainViewModel::refreshAuthenticationRoute
+                        )
+                    }
+                } else {
+                    Box(
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = startDestination!!
-                    )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }

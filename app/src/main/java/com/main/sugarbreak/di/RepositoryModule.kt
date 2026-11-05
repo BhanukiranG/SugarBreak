@@ -3,6 +3,10 @@
 import com.main.sugarbreak.data.repository.ChallengeRepositoryImpl
 import com.main.sugarbreak.data.repository.CheckInRepositoryImpl
 import com.main.sugarbreak.data.repository.PreferencesRepositoryImpl
+import com.main.sugarbreak.data.repository.FirebaseAuthenticationRepository
+import com.main.sugarbreak.data.repository.FirestoreProgressSyncRepository
+import com.main.sugarbreak.domain.repository.AuthenticationRepository
+import com.main.sugarbreak.domain.repository.ProgressSyncRepository
 import com.main.sugarbreak.domain.repository.ChallengeRepository
 import com.main.sugarbreak.domain.repository.CheckInRepository
 import com.main.sugarbreak.domain.repository.PreferencesRepository
@@ -15,6 +19,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthenticationRepository(impl: FirebaseAuthenticationRepository): AuthenticationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProgressSyncRepository(impl: FirestoreProgressSyncRepository): ProgressSyncRepository
 
     @Binds
     @Singleton

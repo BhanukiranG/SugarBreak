@@ -10,5 +10,7 @@ data class DailyCheckIn(
     val status: CheckInStatus,
     val reason: SlipReason?,
     val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val updatedAt: LocalDateTime,
+    val syncId: String = "",
+    val ownerUid: String = ""
 )

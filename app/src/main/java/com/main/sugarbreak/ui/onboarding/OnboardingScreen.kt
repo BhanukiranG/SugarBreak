@@ -500,7 +500,7 @@ fun Step2Profile(name: String, onNameChange: (String) -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Data stored locally.",
+                    text = "Your progress is saved to your account and stays available offline.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "444686065780",
+    "project_id": "sugarbreak-8e377",
+    "storage_bucket": "sugarbreak-8e377.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444686065780:android:8a29fea2e5cb09ad54b121",
+        "android_client_info": {
+          "package_name": "com.main.sugarbreak"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444686065780-o03gcvc2dr38usspadm7fad73b0aec63.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.main.sugarbreak",
+            "certificate_hash": "4336f9970948762d57bf04445681803a7277d3e4"
+          }
+        },
+        {
+          "client_id": "444686065780-jgkta30bkfrvh8lkvvcoeedhrgm1gf0v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBam3b12Z-rD1MV4-GwO6PLS6A3XmaFWnQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444686065780-jgkta30bkfrvh8lkvvcoeedhrgm1gf0v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

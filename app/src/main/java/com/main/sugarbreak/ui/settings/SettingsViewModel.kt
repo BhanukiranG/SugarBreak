@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
@@ -36,6 +37,8 @@ data class SettingsUiState(
     val challengeGoalDays: Int = 30,
     val activeChallengeId: Long? = null,
     val isLoading: Boolean = true,
+    val isSigningOut: Boolean = false,
+    val signOutError: String? = null,
     val isDarkMode: Boolean? = null,
     val appTheme: com.main.sugarbreak.domain.model.AppTheme = com.main.sugarbreak.domain.model.AppTheme.MINT
 )
@@ -48,7 +51,8 @@ class SettingsViewModel @Inject constructor(
     private val checkInRepository: CheckInRepository,
     private val scheduleReminderUseCase: ScheduleReminderUseCase,
     private val cancelReminderUseCase: CancelReminderUseCase,
-    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
+    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase,
+    private val signOutUseCase: com.main.sugarbreak.domain.usecase.SignOutUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -125,6 +129,22 @@ class SettingsViewModel @Inject constructor(
     fun updateUserName(name: String) {
         viewModelScope.launch {
             preferencesRepository.setUserName(name)
+        }
+    }
+
+    fun signOut() {
+        if (_uiState.value.isSigningOut) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSigningOut = true, signOutError = null) }
+            try {
+                signOutUseCase()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                _uiState.update { it.copy(signOutError = failure.message ?: "Could not sign out") }
+            } finally {
+                _uiState.update { it.copy(isSigningOut = false) }
+            }
         }
     }
 

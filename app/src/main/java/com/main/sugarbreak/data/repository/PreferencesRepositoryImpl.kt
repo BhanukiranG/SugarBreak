@@ -4,13 +4,19 @@ import com.main.sugarbreak.data.preferences.PreferencesManager
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.domain.model.ReminderSettings
 import com.main.sugarbreak.domain.repository.PreferencesRepository
+import com.main.sugarbreak.domain.repository.AuthenticationRepository
+import com.main.sugarbreak.domain.repository.ProgressSyncRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
 class PreferencesRepositoryImpl @Inject constructor(
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val authenticationRepository: AuthenticationRepository,
+    private val progressSyncRepository: ProgressSyncRepository
 ) : PreferencesRepository {
     
     override fun getReminderSettings(): Flow<ReminderSettings> {
@@ -28,30 +34,52 @@ class PreferencesRepositoryImpl @Inject constructor(
         preferencesManager.setReminderTime(settings.hour, settings.minute)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getChallengeBehavior(): Flow<ChallengeBehavior> {
-        return preferencesManager.challengeBehavior.map { behaviorStr ->
-            behaviorStr?.let { ChallengeBehavior.valueOf(it) } ?: ChallengeBehavior.CONTINUE
+        return authenticationRepository.currentUser.flatMapLatest { user ->
+            preferencesManager.challengeBehavior(user?.uid).map { stored ->
+                stored?.value?.let { behaviorStr ->
+                    runCatching { ChallengeBehavior.valueOf(behaviorStr) }.getOrDefault(ChallengeBehavior.CONTINUE)
+                } ?: ChallengeBehavior.CONTINUE
+            }
         }
     }
 
     override suspend fun updateChallengeBehavior(behavior: ChallengeBehavior) {
-        preferencesManager.setChallengeBehavior(behavior.name)
+        val uid = authenticationRepository.currentUserSnapshot()?.uid
+            ?: error("An authenticated account is required to save challenge behavior")
+        preferencesManager.setChallengeBehavior(uid, behavior.name)
+        progressSyncRepository.schedule(uid)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getOnboardingCompleted(): Flow<Boolean> {
-        return preferencesManager.onboardingCompleted
+        return authenticationRepository.currentUser.flatMapLatest { user ->
+            preferencesManager.onboardingCompleted(user?.uid).map { it ?: false }
+        }
     }
 
     override suspend fun setOnboardingCompleted(completed: Boolean) {
-        preferencesManager.setOnboardingCompleted(completed)
+        val uid = authenticationRepository.currentUserSnapshot()?.uid
+            ?: error("An authenticated account is required to save onboarding state")
+        preferencesManager.setOnboardingCompleted(uid, completed)
+        progressSyncRepository.schedule(uid)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getUserName(): Flow<String> {
-        return preferencesManager.userName.map { if (it.isNullOrBlank() || it == "Local Profile") "Friend" else it }
+        return authenticationRepository.currentUser.flatMapLatest { user ->
+            preferencesManager.userName(user?.uid).map {
+                if (it?.value.isNullOrBlank() || it?.value == "Local Profile") "Friend" else it!!.value
+            }
+        }
     }
 
     override suspend fun setUserName(name: String) {
-        preferencesManager.setUserName(name)
+        val uid = authenticationRepository.currentUserSnapshot()?.uid
+            ?: error("An authenticated account is required to save a profile")
+        preferencesManager.setUserName(uid, name)
+        progressSyncRepository.schedule(uid)
     }
 
     override fun getIsDarkMode(): Flow<Boolean?> {
