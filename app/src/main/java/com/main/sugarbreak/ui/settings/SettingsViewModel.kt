@@ -48,7 +48,8 @@ class SettingsViewModel @Inject constructor(
     private val checkInRepository: CheckInRepository,
     private val scheduleReminderUseCase: ScheduleReminderUseCase,
     private val cancelReminderUseCase: CancelReminderUseCase,
-    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase
+    private val createChallengeUseCase: com.main.sugarbreak.domain.usecase.CreateChallengeUseCase,
+    private val signOutUseCase: com.main.sugarbreak.domain.usecase.SignOutUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -126,6 +127,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesRepository.setUserName(name)
         }
+    }
+
+    fun signOut() {
+        viewModelScope.launch { signOutUseCase() }
     }
 
     fun updateChallengeGoal(targetDays: Int, onComplete: () -> Unit = {}) {

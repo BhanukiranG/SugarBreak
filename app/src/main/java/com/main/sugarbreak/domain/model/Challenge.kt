@@ -10,5 +10,8 @@ data class Challenge(
     val recoveryDays: Int,
     val status: ChallengeStatus,
     val createdAt: LocalDateTime,
-    val behavior: ChallengeBehavior
+    val behavior: ChallengeBehavior,
+    val syncId: String = "",
+    val ownerUid: String = "",
+    val updatedAt: LocalDateTime = createdAt
 )

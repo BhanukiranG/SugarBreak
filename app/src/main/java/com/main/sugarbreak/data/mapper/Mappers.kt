@@ -16,7 +16,10 @@ fun ChallengeEntity.toDomain(): Challenge {
         recoveryDays = recoveryDays,
         status = ChallengeStatus.valueOf(status),
         createdAt = createdAt,
-        behavior = ChallengeBehavior.valueOf(behavior)
+        behavior = ChallengeBehavior.valueOf(behavior),
+        syncId = syncId,
+        ownerUid = ownerUid,
+        updatedAt = updatedAt
     )
 }
 
@@ -28,7 +31,10 @@ fun Challenge.toEntity(): ChallengeEntity {
         recoveryDays = recoveryDays,
         status = status.name,
         createdAt = createdAt,
-        behavior = behavior.name
+        behavior = behavior.name,
+        ownerUid = ownerUid,
+        syncId = syncId,
+        updatedAt = updatedAt
     )
 }
 
@@ -40,7 +46,9 @@ fun DailyCheckInEntity.toDomain(): DailyCheckIn {
         status = CheckInStatus.valueOf(status),
         reason = reason?.let { com.main.sugarbreak.domain.model.SlipReason.valueOf(it) },
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        syncId = syncId,
+        ownerUid = ownerUid
     )
 }
 
@@ -52,6 +60,8 @@ fun DailyCheckIn.toEntity(): DailyCheckInEntity {
         status = status.name,
         reason = reason?.name,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        ownerUid = ownerUid,
+        syncId = syncId
     )
 }

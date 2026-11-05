@@ -52,6 +52,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -61,6 +62,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,6 +86,7 @@ import com.main.sugarbreak.ui.components.SugarBackground
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +99,7 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
@@ -410,6 +414,22 @@ fun SettingsScreen(
                                 )
                             }
                         }
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            val credentialManager = androidx.credentials.CredentialManager.create(context)
+                            coroutineScope.launch {
+                                runCatching {
+                                    credentialManager.clearCredentialState(
+                                        androidx.credentials.ClearCredentialStateRequest()
+                                    )
+                                }
+                                viewModel.signOut()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Sign out")
                     }
                     // App Version Footer
                     Column(

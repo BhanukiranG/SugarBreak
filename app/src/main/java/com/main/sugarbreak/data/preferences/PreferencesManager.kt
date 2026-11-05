@@ -30,7 +30,6 @@ class PreferencesManager(private val context: Context) {
     val reminderMinute: Flow<Int> = context.dataStore.data.map { it[REMINDER_MINUTE] ?: 0 }
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
     val challengeBehavior: Flow<String?> = context.dataStore.data.map { it[CHALLENGE_BEHAVIOR] }
-    val userName: Flow<String?> = context.dataStore.data.map { it[USER_NAME] }
     val isDarkMode: Flow<Boolean?> = context.dataStore.data.map { it[IS_DARK_MODE] }
     val appTheme: Flow<String?> = context.dataStore.data.map { it[APP_THEME] }
 
@@ -53,8 +52,22 @@ class PreferencesManager(private val context: Context) {
         context.dataStore.edit { it[CHALLENGE_BEHAVIOR] = behavior }
     }
 
-    suspend fun setUserName(name: String) {
-        context.dataStore.edit { it[USER_NAME] = name }
+    fun userName(uid: String?): Flow<String?> = context.dataStore.data.map { preferences ->
+        if (uid == null) null else preferences[stringPreferencesKey("USER_NAME_$uid")]
+    }
+
+    suspend fun setUserName(uid: String, name: String) {
+        context.dataStore.edit { it[stringPreferencesKey("USER_NAME_$uid")] = name }
+    }
+
+    suspend fun claimLegacyUserName(uid: String) {
+        context.dataStore.edit { preferences ->
+            val accountKey = stringPreferencesKey("USER_NAME_$uid")
+            if (preferences[accountKey] == null && preferences[USER_NAME] != null) {
+                preferences[accountKey] = preferences[USER_NAME]!!
+            }
+            preferences.remove(USER_NAME)
+        }
     }
 
     suspend fun setIsDarkMode(isDark: Boolean?) {

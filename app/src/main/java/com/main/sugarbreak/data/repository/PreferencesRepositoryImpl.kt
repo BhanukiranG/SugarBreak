@@ -4,13 +4,19 @@ import com.main.sugarbreak.data.preferences.PreferencesManager
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.domain.model.ReminderSettings
 import com.main.sugarbreak.domain.repository.PreferencesRepository
+import com.main.sugarbreak.domain.repository.AuthenticationRepository
+import com.main.sugarbreak.domain.repository.ProgressSyncRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
 class PreferencesRepositoryImpl @Inject constructor(
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val authenticationRepository: AuthenticationRepository,
+    private val progressSyncRepository: ProgressSyncRepository
 ) : PreferencesRepository {
     
     override fun getReminderSettings(): Flow<ReminderSettings> {
@@ -46,12 +52,20 @@ class PreferencesRepositoryImpl @Inject constructor(
         preferencesManager.setOnboardingCompleted(completed)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getUserName(): Flow<String> {
-        return preferencesManager.userName.map { if (it.isNullOrBlank() || it == "Local Profile") "Friend" else it }
+        return authenticationRepository.currentUser.flatMapLatest { user ->
+            preferencesManager.userName(user?.uid).map {
+                if (it.isNullOrBlank() || it == "Local Profile") "Friend" else it
+            }
+        }
     }
 
     override suspend fun setUserName(name: String) {
-        preferencesManager.setUserName(name)
+        val uid = authenticationRepository.currentUserSnapshot()?.uid
+            ?: error("An authenticated account is required to save a profile")
+        preferencesManager.setUserName(uid, name)
+        progressSyncRepository.schedule(uid)
     }
 
     override fun getIsDarkMode(): Flow<Boolean?> {
