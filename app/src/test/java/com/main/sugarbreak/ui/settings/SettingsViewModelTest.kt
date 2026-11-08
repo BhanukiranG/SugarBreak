@@ -3,6 +3,7 @@ package com.main.sugarbreak.ui.settings
 import com.main.sugarbreak.domain.model.AuthenticatedUser
 import com.main.sugarbreak.domain.model.Challenge
 import com.main.sugarbreak.domain.model.ChallengeBehavior
+import com.main.sugarbreak.domain.model.ChallengeStatus
 import com.main.sugarbreak.domain.model.DailyCheckIn
 import com.main.sugarbreak.domain.model.ReminderSettings
 import com.main.sugarbreak.domain.repository.AuthenticationRepository
@@ -72,9 +73,10 @@ class SettingsViewModelTest {
     }
 
     private class FakeChallengeRepository : ChallengeRepository {
+        val activeChallengeState = MutableStateFlow<Challenge?>(null)
         override suspend fun insert(challenge: Challenge) = 1L
         override suspend fun update(challenge: Challenge) = Unit
-        override fun getActiveChallenge() = flowOf<Challenge?>(null)
+        override fun getActiveChallenge() = activeChallengeState
         override suspend fun getChallengeById(id: Long) = null
         override fun getAllChallenges() = flowOf(emptyList<Challenge>())
     }
@@ -97,8 +99,10 @@ class SettingsViewModelTest {
 
     @After fun tearDown() { Dispatchers.resetMain() }
 
-    private fun createViewModel(auth: FakeAuthenticationRepository): SettingsViewModel {
-        val challenges = FakeChallengeRepository()
+    private fun createViewModel(
+        auth: FakeAuthenticationRepository,
+        challenges: FakeChallengeRepository = FakeChallengeRepository()
+    ): SettingsViewModel {
         val scheduler = FakeReminderScheduler()
         return SettingsViewModel(
             preferencesRepository = FakePreferencesRepository(),
@@ -110,6 +114,23 @@ class SettingsViewModelTest {
             createChallengeUseCase = CreateChallengeUseCase(challenges),
             signOutUseCase = SignOutUseCase(auth)
         )
+    }
+
+    @Test fun `synced challenge rule updates separately from the default rule`() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        val challenges = FakeChallengeRepository()
+        val viewModel = createViewModel(FakeAuthenticationRepository(), challenges)
+        val day = LocalDate.of(2026, 11, 8)
+        val challenge = Challenge(1, day, 30, 0, ChallengeStatus.ACTIVE, day.atStartOfDay(), ChallengeBehavior.RESET_STREAK)
+
+        challenges.activeChallengeState.value = challenge
+        advanceUntilIdle()
+        assertEquals(ChallengeBehavior.RESET_STREAK, viewModel.uiState.value.activeChallengeBehavior)
+
+        challenges.activeChallengeState.value = challenge.copy(behavior = ChallengeBehavior.ADD_RECOVERY_DAY)
+        advanceUntilIdle()
+        assertEquals(ChallengeBehavior.ADD_RECOVERY_DAY, viewModel.uiState.value.activeChallengeBehavior)
+        assertEquals(ChallengeBehavior.CONTINUE, viewModel.uiState.value.challengeBehavior)
     }
 
     @Test fun `sign out shows loading state and ignores duplicate taps until complete`() = runTest {

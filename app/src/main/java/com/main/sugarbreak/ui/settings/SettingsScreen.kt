@@ -343,18 +343,23 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(18.dp)
                         ) {
                             Column {
-                                val behaviorText = when (uiState.challengeBehavior) {
-                                    ChallengeBehavior.CONTINUE -> "Continue tracking normally"
-                                    ChallengeBehavior.ADD_RECOVERY_DAY -> "Add recovery day"
-                                    ChallengeBehavior.RESET_STREAK -> "Reset streak"
+                                uiState.activeChallengeBehavior?.let { behavior ->
+                                    SettingsActionRow(
+                                        icon = Icons.Default.Sync,
+                                        iconTint = primaryColor,
+                                        iconBg = primaryColor.copy(alpha = 0.12f),
+                                        title = "Active Challenge Rule",
+                                        subtitle = behavior.settingsLabel()
+                                    )
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                                 }
                                 SettingsActionRow(
                                     icon = Icons.Default.Sync,
                                     iconTint = primaryColor,
                                     iconBg = primaryColor.copy(alpha = 0.12f),
-                                    title = "Rule on Slip ups",
-                                    subtitle = "Non punitive mindset",
-                                    valueText = behaviorText,
+                                    title = "Default Challenge Rule",
+                                    subtitle = "For new challenges",
+                                    valueText = uiState.challengeBehavior.settingsLabel(),
                                     onClick = { showRuleDialog = true }
                                 )
 
@@ -785,6 +790,12 @@ private fun SettingsToggleRow(
     }
 }
 
+private fun ChallengeBehavior.settingsLabel(): String = when (this) {
+    ChallengeBehavior.CONTINUE -> "Continue tracking normally"
+    ChallengeBehavior.ADD_RECOVERY_DAY -> "Add recovery day"
+    ChallengeBehavior.RESET_STREAK -> "Reset streak"
+}
+
 @Composable
 private fun SettingsActionRow(
     icon: ImageVector,
@@ -795,12 +806,12 @@ private fun SettingsActionRow(
     valueText: String? = null,
     badgeText: String? = null,
     badgeColor: Color = MaterialTheme.colorScheme.primary,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -858,14 +869,15 @@ private fun SettingsActionRow(
             )
         }
 
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.NavigateNext,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(18.dp)
-        )
+        if (onClick != null) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.NavigateNext,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 

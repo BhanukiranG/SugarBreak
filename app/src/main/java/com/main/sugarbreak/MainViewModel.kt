@@ -42,6 +42,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun refreshProgress() {
+        if (_startDestination.value != "home") return
+        val user = authenticationRepository.currentUserSnapshot() ?: return
+        if (user.emailVerified) progressSyncRepository.schedule(user.uid)
+    }
+
     private suspend fun resolveRouteForUser(user: com.main.sugarbreak.domain.model.AuthenticatedUser?) {
         if (user == null || !user.emailVerified) {
             _startDestination.value = "auth"
