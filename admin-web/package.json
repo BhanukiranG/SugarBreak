@@ -1,0 +1,28 @@
+{
+  "name": "sugarbreak-admin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --test tests/domain.test.mjs",
+    "test:rules": "firebase emulators:exec --config ../firebase.json --only firestore --project demo-sugarbreak-admin \"node --test tests/rules.test.mjs\"",
+    "admin:grant": "node scripts/admin-access.mjs grant",
+    "admin:revoke": "node scripts/admin-access.mjs revoke"
+  },
+  "dependencies": {
+    "firebase": "^13.2.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "firebase-admin": "^14.5.0",
+    "firebase-tools": "^15.35.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6"
+  }
+}

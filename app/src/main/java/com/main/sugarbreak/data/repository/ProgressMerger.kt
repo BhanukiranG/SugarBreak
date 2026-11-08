@@ -50,3 +50,25 @@ internal fun isCheckInSuppressedByPendingReset(
     val cutoff = challengeSyncId?.let(pendingResetCutoffs::get) ?: return false
     return createdAt == null || !createdAt.isAfter(cutoff)
 }
+
+internal fun mergeCloudProfileWrite(
+    proposed: Map<String, Any?>,
+    latest: Map<String, Any?>
+): Map<String, Any?> {
+    val result = proposed.toMutableMap()
+    listOf("displayName" to "displayNameUpdatedAt", "challengeBehavior" to "challengeBehaviorUpdatedAt")
+        .forEach { (valueKey, timeKey) ->
+            val remoteTime = (latest[timeKey] as? Number)?.toLong() ?: 0L
+            val localTime = (proposed[timeKey] as? Number)?.toLong() ?: 0L
+            if (latest[valueKey] != null && (proposed[valueKey] == null || remoteTime > localTime)) {
+                result[valueKey] = latest[valueKey]
+                result[timeKey] = remoteTime
+            }
+        }
+    if (latest["onboardingCompleted"] == true) result["onboardingCompleted"] = true
+    result["updatedAt"] = maxOf(
+        (proposed["updatedAt"] as? Number)?.toLong() ?: 0L,
+        (latest["updatedAt"] as? Number)?.toLong() ?: 0L
+    )
+    return result
+}

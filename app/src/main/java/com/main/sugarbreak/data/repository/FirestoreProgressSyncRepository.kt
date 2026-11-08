@@ -9,6 +9,8 @@ import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.data.preferences.PreferencesManager
 import com.main.sugarbreak.domain.repository.AuthenticationRepository
 import com.main.sugarbreak.domain.repository.ProgressSyncRepository
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,6 +77,7 @@ class FirestoreProgressSyncRepository @Inject constructor(
         preferencesManager.claimLegacyUserName(uid)
 
         val user = firestore.collection("users").document(uid)
+        val syncState = user.collection("syncState").document("progress")
         val remoteProfile = user.get().await()
         val localChallenges = challengeDao.getAllChallengesSync(uid)
         val remoteChallengeSnapshot = user.collection("challenges").get().await()
@@ -131,6 +134,7 @@ class FirestoreProgressSyncRepository @Inject constructor(
         resetDocuments.chunked(400).forEach { documents ->
             val deletionBatch = firestore.batch()
             documents.forEach { deletionBatch.delete(it.reference) }
+            deletionBatch.set(syncState, mapOf("revision" to FieldValue.serverTimestamp()))
             deletionBatch.commit().await()
         }
         if (!remoteCheckInSnapshot.metadata.isFromCache) {
@@ -211,9 +215,25 @@ class FirestoreProgressSyncRepository @Inject constructor(
             writes += user.collection("checkIns").document(checkIn.syncId) to checkIn.toCloudMap(savedChallenges)
         }
         writes.chunked(400).forEach { chunk ->
-            val batch = firestore.batch()
-            chunk.forEach { (reference, data) -> batch.set(reference, data) }
-            batch.commit().await()
+            // Recheck versions inside the commit: an admin may have corrected a record
+            // after the initial sync snapshot was read.
+            firestore.runTransaction { transaction ->
+                transaction.get(syncState)
+                val current = chunk.map { (reference, _) -> transaction.get(reference) }
+                chunk.forEachIndexed { index, (reference, data) ->
+                    val latest = current[index]
+                    if (reference.path == user.path) {
+                        transaction.set(reference, mergeCloudProfileWrite(data, latest.data.orEmpty()), SetOptions.merge())
+                    } else {
+                        val remoteTime = latest.getString("updatedAt")?.let { LocalDateTime.parse(it) }
+                        val proposedTime = (data["updatedAt"] as? String)?.let { LocalDateTime.parse(it) }
+                        if (remoteTime == null || (proposedTime != null && !remoteTime.isAfter(proposedTime))) {
+                            transaction.set(reference, data, SetOptions.merge())
+                        }
+                    }
+                }
+                transaction.set(syncState, mapOf("revision" to FieldValue.serverTimestamp()))
+            }.await()
         }
     }
 }

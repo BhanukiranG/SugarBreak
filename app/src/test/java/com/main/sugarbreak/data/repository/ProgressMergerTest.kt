@@ -8,6 +8,19 @@ import org.junit.Test
 import java.time.LocalDateTime
 
 class ProgressMergerTest {
+    @Test fun `in flight sync preserves newer admin profile corrections`() {
+        val proposed = mapOf<String, Any?>("displayName" to "Old", "displayNameUpdatedAt" to 10L,
+            "challengeBehavior" to "CONTINUE", "challengeBehaviorUpdatedAt" to 10L,
+            "onboardingCompleted" to false, "updatedAt" to 30L)
+        val latest = mapOf<String, Any?>("displayName" to "Corrected", "displayNameUpdatedAt" to 20L,
+            "challengeBehavior" to "RESET_STREAK", "challengeBehaviorUpdatedAt" to 20L,
+            "onboardingCompleted" to true, "updatedAt" to 20L)
+        val merged = mergeCloudProfileWrite(proposed, latest)
+        assertEquals("Corrected", merged["displayName"])
+        assertEquals("RESET_STREAK", merged["challengeBehavior"])
+        assertEquals(true, merged["onboardingCompleted"])
+        assertEquals(30L, merged["updatedAt"])
+    }
     private data class Record(val id: String, val value: String, val updatedAt: LocalDateTime)
 
     @Test fun `merge keeps disjoint records from both sources`() {
