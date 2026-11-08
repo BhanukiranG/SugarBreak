@@ -19,5 +19,6 @@ data class ChallengeEntity(
     val behavior: String,
     @ColumnInfo(defaultValue = "''") val ownerUid: String = "",
     @ColumnInfo(defaultValue = "''") val syncId: String = "",
-    @ColumnInfo(defaultValue = "''") val updatedAt: LocalDateTime = createdAt
+    @ColumnInfo(defaultValue = "''") val updatedAt: LocalDateTime = createdAt,
+    val checkInResetDate: LocalDate? = null
 )

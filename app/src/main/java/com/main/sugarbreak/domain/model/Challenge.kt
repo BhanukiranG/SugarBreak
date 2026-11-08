@@ -13,5 +13,6 @@ data class Challenge(
     val behavior: ChallengeBehavior,
     val syncId: String = "",
     val ownerUid: String = "",
-    val updatedAt: LocalDateTime = createdAt
+    val updatedAt: LocalDateTime = createdAt,
+    val checkInResetDate: LocalDate? = null
 )

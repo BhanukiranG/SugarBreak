@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.main.sugarbreak.data.local.entity.ChallengeEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -11,6 +12,15 @@ import kotlinx.coroutines.flow.Flow
 interface ChallengeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(challenge: ChallengeEntity): Long
+
+    @Transaction
+    suspend fun restoreSyncedChallenge(challenge: ChallengeEntity) {
+        val current = getChallengeBySyncId(challenge.ownerUid, challenge.syncId)
+        val newest = if (current != null && current.updatedAt > challenge.updatedAt) current else challenge
+        val resetDate = listOfNotNull(current?.checkInResetDate, challenge.checkInResetDate).maxOrNull()
+        val merged = newest.copy(id = current?.id ?: 0, checkInResetDate = resetDate)
+        if (current != merged) insert(merged)
+    }
 
     @Query("UPDATE challenges SET startDate = :startDate, targetSuccessfulDays = :targetSuccessfulDays, recoveryDays = :recoveryDays, status = :status, createdAt = :createdAt, behavior = :behavior, syncId = :syncId, updatedAt = :updatedAt WHERE id = :id AND ownerUid = :ownerUid")
     suspend fun update(

@@ -176,13 +176,22 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun resetAllData(onComplete: () -> Unit) {
+    fun resetAllData(onComplete: (String) -> Unit) {
         viewModelScope.launch {
-            val activeChallengeId = _uiState.value.activeChallengeId
-            if (activeChallengeId != null) {
-                checkInRepository.deleteAllCheckInsForChallenge(activeChallengeId)
+            val message = try {
+                val challenge = getActiveChallengeUseCase().firstOrNull()
+                if (challenge == null) {
+                    "There is no active challenge to reset."
+                } else {
+                    checkInRepository.deleteAllCheckInsForChallenge(challenge.id)
+                    "Active challenge check-ins cleared on this device."
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                "Could not clear check-ins. Please try again."
             }
-            onComplete()
+            onComplete(message)
         }
     }
 

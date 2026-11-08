@@ -95,6 +95,29 @@ class GetUnloggedPastDaysUseCaseTest {
     }
 
     @Test
+    fun `reset excludes earlier missed days and counts only dates from reset onward`() = runBlocking {
+        val today = LocalDate.now()
+        val challengeRepo = FakeChallengeRepository()
+        val challenge = Challenge(
+            id = 1L,
+            startDate = today.minusDays(3),
+            targetSuccessfulDays = 30,
+            recoveryDays = 0,
+            status = ChallengeStatus.ACTIVE,
+            createdAt = today.minusDays(3).atStartOfDay(),
+            behavior = ChallengeBehavior.CONTINUE,
+            checkInResetDate = today
+        )
+        val useCase = GetUnloggedPastDaysUseCase(GetActiveChallengeUseCase(challengeRepo), FakeCheckInRepository())
+
+        challengeRepo.challenge = challenge
+        assertTrue(useCase().first().isEmpty())
+
+        challengeRepo.challenge = challenge.copy(checkInResetDate = today.minusDays(1))
+        assertEquals(listOf(today.minusDays(1)), useCase().first())
+    }
+
+    @Test
     fun `test when some past days are checked in returns only unlogged days`() = runBlocking {
         val challengeRepo = FakeChallengeRepository()
         val startDate = LocalDate.now().minusDays(4)

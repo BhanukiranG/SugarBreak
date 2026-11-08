@@ -11,6 +11,8 @@ import com.main.sugarbreak.domain.repository.AuthenticationRepository
 import com.main.sugarbreak.domain.repository.ProgressSyncRepository
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Source
+import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -99,11 +101,13 @@ class FirestoreProgressSyncRepository @Inject constructor(
         )
         val mergedChallenges = newestChallenges.map { remoteOrLocal ->
             val existing = localChallenges.firstOrNull { it.syncId == remoteOrLocal.syncId }
-            remoteOrLocal.copy(id = existing?.id ?: 0, ownerUid = uid)
+            val remote = remoteChallenges.firstOrNull { it.syncId == remoteOrLocal.syncId }
+            val resetDate = listOfNotNull(existing?.checkInResetDate, remote?.checkInResetDate).maxOrNull()
+            remoteOrLocal.copy(id = existing?.id ?: 0, ownerUid = uid, checkInResetDate = resetDate)
         }
         mergedChallenges.forEach { challenge ->
             if (localChallenges.firstOrNull { it.syncId == challenge.syncId } != challenge) {
-                challengeDao.insert(challenge)
+                challengeDao.restoreSyncedChallenge(challenge)
             }
         }
         val savedChallenges = challengeDao.getAllChallengesSync(uid)
@@ -121,37 +125,29 @@ class FirestoreProgressSyncRepository @Inject constructor(
             val challengeSyncId = savedChallenges.firstOrNull { it.id == record.challengeId }?.syncId.orEmpty()
             record.copy(syncId = "${challengeSyncId}_${record.date}")
         }
-        val remoteCheckInSnapshot = user.collection("checkIns").get().await()
-        val resetDocuments = remoteCheckInSnapshot.documents.filter { document ->
-            isCheckInSuppressedByPendingReset(
+        val checkInSource = if (pendingResets.isEmpty()) Source.DEFAULT else Source.SERVER
+        val remoteCheckInSnapshot = user.collection("checkIns").get(checkInSource).await()
+        fun isResetCheckIn(document: DocumentSnapshot): Boolean =
+            document.exists() && isCheckInSuppressedByPendingReset(
                 challengeSyncId = document.getString("challengeSyncId"),
                 createdAt = document.getString("createdAt")?.let { raw ->
                     runCatching { LocalDateTime.parse(raw) }.getOrNull()
                 },
                 pendingResetCutoffs = pendingResetCutoffs
             )
-        }
+        val resetDocuments = remoteCheckInSnapshot.documents.filter(::isResetCheckIn)
         resetDocuments.chunked(400).forEach { documents ->
-            val deletionBatch = firestore.batch()
-            documents.forEach { deletionBatch.delete(it.reference) }
-            deletionBatch.set(syncState, mapOf("revision" to FieldValue.serverTimestamp()))
-            deletionBatch.commit().await()
-        }
-        if (!remoteCheckInSnapshot.metadata.isFromCache) {
-            pendingResets.forEach { reset ->
-                checkInDao.removePendingChallengeReset(uid, reset.challengeSyncId)
-            }
+            firestore.runTransaction { transaction ->
+                val current = documents.map { transaction.get(it.reference) }
+                    .filter(::isResetCheckIn)
+                if (current.isNotEmpty()) {
+                    current.forEach { transaction.delete(it.reference) }
+                    transaction.set(syncState, mapOf("revision" to FieldValue.serverTimestamp()))
+                }
+            }.await()
         }
         val remoteChecks = remoteCheckInSnapshot.documents
-            .filterNot {
-                isCheckInSuppressedByPendingReset(
-                    challengeSyncId = it.getString("challengeSyncId"),
-                    createdAt = it.getString("createdAt")?.let { raw ->
-                        runCatching { LocalDateTime.parse(raw) }.getOrNull()
-                    },
-                    pendingResetCutoffs = pendingResetCutoffs
-                )
-            }
+            .filterNot(::isResetCheckIn)
             .mapNotNull { doc -> doc.toCheckIn(uid, savedChallenges) }
 
         val localBehavior = preferencesManager.challengeBehavior(uid).first()
@@ -173,14 +169,10 @@ class FirestoreProgressSyncRepository @Inject constructor(
             keyOf = { it.syncId },
             updatedAt = { it.updatedAt }
         )
-            .map { candidate ->
-                val existing = localChecks.firstOrNull { it.syncId == candidate.syncId }
-                candidate.copy(id = existing?.id ?: 0, ownerUid = uid)
+            .filter { candidate ->
+                val challenge = savedChallenges.firstOrNull { it.id == candidate.challengeId }
+                challenge != null && checkInDao.restoreSyncedCheckIn(candidate, challenge.syncId)
             }
-        mergedChecks.forEach { checkIn ->
-            val existing = localChecksRaw.firstOrNull { it.id == checkIn.id }
-            if (existing != checkIn) checkInDao.insert(checkIn)
-        }
 
         val localName = preferencesManager.userName(uid).first()
         val resolvedName = resolveTimestampedValue(
@@ -200,10 +192,11 @@ class FirestoreProgressSyncRepository @Inject constructor(
             "challengeBehaviorUpdatedAt" to resolvedBehavior?.second,
             "updatedAt" to System.currentTimeMillis()
         )
-        mergedChallenges.filter { challenge ->
+        savedChallenges.filter { challenge ->
             val remote = remoteChallenges.firstOrNull { it.syncId == challenge.syncId }
             val local = localChallenges.firstOrNull { it.syncId == challenge.syncId }
-            remote == null || (local != null && local.updatedAt >= remote.updatedAt)
+            remote == null || challenge.checkInResetDate != remote.checkInResetDate ||
+                (local != null && local.updatedAt >= remote.updatedAt)
         }.forEach { challenge ->
             writes += user.collection("challenges").document(challenge.syncId) to challenge.toCloudMap()
         }
@@ -227,13 +220,25 @@ class FirestoreProgressSyncRepository @Inject constructor(
                     } else {
                         val remoteTime = latest.getString("updatedAt")?.let { LocalDateTime.parse(it) }
                         val proposedTime = (data["updatedAt"] as? String)?.let { LocalDateTime.parse(it) }
+                        val resetDate = listOfNotNull(
+                            latest.getString("checkInResetDate"),
+                            data["checkInResetDate"] as? String
+                        ).maxOrNull()
                         if (remoteTime == null || (proposedTime != null && !remoteTime.isAfter(proposedTime))) {
-                            transaction.set(reference, data, SetOptions.merge())
+                            val merged = if (resetDate == null) data else data + ("checkInResetDate" to resetDate)
+                            transaction.set(reference, merged, SetOptions.merge())
+                        } else if (resetDate != null && resetDate != latest.getString("checkInResetDate")) {
+                            transaction.set(reference, mapOf("checkInResetDate" to resetDate), SetOptions.merge())
                         }
                     }
                 }
                 transaction.set(syncState, mapOf("revision" to FieldValue.serverTimestamp()))
             }.await()
+        }
+        if (!remoteCheckInSnapshot.metadata.isFromCache) {
+            pendingResets.forEach { reset ->
+                checkInDao.removePendingChallengeReset(uid, reset.challengeSyncId, reset.requestedAt)
+            }
         }
     }
 }
@@ -250,7 +255,8 @@ private fun com.google.firebase.firestore.DocumentSnapshot.toChallenge(uid: Stri
         behavior = getString("behavior") ?: return null,
         ownerUid = uid,
         syncId = getString("syncId") ?: id,
-        updatedAt = getString("updatedAt")?.let(LocalDateTime::parse) ?: created
+        updatedAt = getString("updatedAt")?.let(LocalDateTime::parse) ?: created,
+        checkInResetDate = getString("checkInResetDate")?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
     )
 }.getOrNull()
 
@@ -282,7 +288,7 @@ private fun ChallengeEntity.toCloudMap(): Map<String, Any> = mapOf(
     "createdAt" to createdAt.toString(),
     "updatedAt" to updatedAt.toString(),
     "behavior" to behavior
-)
+) + (checkInResetDate?.let { mapOf("checkInResetDate" to it.toString()) } ?: emptyMap())
 
 private fun DailyCheckInEntity.toCloudMap(challenges: List<ChallengeEntity>): Map<String, Any?> = mapOf(
     "syncId" to syncId,

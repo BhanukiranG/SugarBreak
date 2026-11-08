@@ -81,6 +81,7 @@ class PersistenceRepositoryTest {
         var inserted: DailyCheckInEntity? = null
         var updated: DailyCheckInEntity? = null
         var reset: Triple<Long, String, String>? = null
+        var pendingReset: PendingCheckInResetEntity? = null
         override suspend fun insert(checkIn: DailyCheckInEntity): Long {
             inserted = checkIn
             return 5L
@@ -105,8 +106,11 @@ class PersistenceRepositoryTest {
         override suspend fun deleteAllCheckInsForChallenge(challengeId: Long, ownerUid: String) = Unit
         override suspend fun deleteCheckInsByIds(ownerUid: String, ids: List<Long>) = Unit
         override suspend fun enqueueChallengeReset(reset: PendingCheckInResetEntity) = Unit
+        override suspend fun recordCheckInResetDate(challengeId: Long, ownerUid: String, date: LocalDate) = Unit
         override suspend fun getPendingChallengeResets(ownerUid: String): List<PendingCheckInResetEntity> = emptyList()
-        override suspend fun removePendingChallengeReset(ownerUid: String, challengeSyncId: String) = Unit
+        override suspend fun removePendingChallengeReset(ownerUid: String, challengeSyncId: String, requestedAt: LocalDateTime) = Unit
+        override suspend fun getPendingChallengeReset(ownerUid: String, challengeSyncId: String) =
+            pendingReset?.takeIf { it.ownerUid == ownerUid && it.challengeSyncId == challengeSyncId }
         override suspend fun resetCheckInsForChallenge(challengeId: Long, ownerUid: String, challengeSyncId: String) {
             reset = Triple(challengeId, ownerUid, challengeSyncId)
         }
@@ -197,5 +201,23 @@ class PersistenceRepositoryTest {
 
         assertEquals(Triple(42L, "account-a", "challenge-stable-id"), checkInDao.reset)
         assertEquals(listOf("account-a"), sync.scheduledUids)
+    }
+
+    @Test
+    fun syncCannotRestorePreResetCheckInButCanRestoreANewCheckInForTheSameDay() = runBlocking {
+        val dao = FakeDailyCheckInDao()
+        val old = DailyCheckInEntity(
+            challengeId = 42, date = timestamp.toLocalDate(), status = "SUCCESS", reason = null,
+            createdAt = timestamp, updatedAt = timestamp, ownerUid = "account-a"
+        )
+        // Sync took its snapshot before the user tapped reset.
+        val resetAt = timestamp.plusMinutes(1)
+        dao.pendingReset = PendingCheckInResetEntity(old.ownerUid, "challenge-stable-id", resetAt)
+        assertEquals(false, dao.restoreSyncedCheckIn(old, "challenge-stable-id"))
+        assertEquals(null, dao.inserted)
+
+        val new = old.copy(createdAt = resetAt.plusSeconds(1), updatedAt = resetAt.plusSeconds(1))
+        assertTrue(dao.restoreSyncedCheckIn(new, "challenge-stable-id"))
+        assertEquals(new, dao.inserted)
     }
 }

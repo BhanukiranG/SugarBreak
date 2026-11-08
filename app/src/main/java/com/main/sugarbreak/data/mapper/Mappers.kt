@@ -19,7 +19,8 @@ fun ChallengeEntity.toDomain(): Challenge {
         behavior = ChallengeBehavior.valueOf(behavior),
         syncId = syncId,
         ownerUid = ownerUid,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        checkInResetDate = checkInResetDate
     )
 }
 
@@ -34,7 +35,8 @@ fun Challenge.toEntity(): ChallengeEntity {
         behavior = behavior.name,
         ownerUid = ownerUid,
         syncId = syncId,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        checkInResetDate = checkInResetDate
     )
 }
 

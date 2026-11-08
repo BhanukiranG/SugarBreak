@@ -409,7 +409,7 @@ fun SettingsScreen(
                                     icon = Icons.Default.DeleteOutline,
                                     iconTint = MaterialTheme.colorScheme.error,
                                     iconBg = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                                    title = "Reset All Data",
+                                    title = "Reset Challenge Check-ins",
                                     badgeText = "Caution",
                                     badgeColor = MaterialTheme.colorScheme.error,
                                     onClick = { showResetDialog = true }
@@ -709,16 +709,16 @@ fun SettingsScreen(
         if (showResetDialog) {
             AlertDialog(
                 onDismissRequest = { showResetDialog = false },
-                title = { Text("Reset All Data", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
+                title = { Text("Reset Challenge Check-ins", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
                 text = {
-                    Text("Are you sure you want to reset your logs? This will clear past check in records for a fresh start.")
+                    Text("Clear the active challenge's check-ins? The reset will sync to Firebase when you're online.")
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.resetAllData {
+                            viewModel.resetAllData { message ->
                                 showResetDialog = false
-                                Toast.makeText(context, "All tracking data has been reset", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                             }
                         }
                     ) {

@@ -4,7 +4,6 @@ import com.main.sugarbreak.domain.model.CheckInStatus
 import com.main.sugarbreak.domain.repository.CheckInRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -24,7 +23,7 @@ class GetUnloggedPastDaysUseCase @Inject constructor(
 
             val today = LocalDate.now()
             val yesterday = today.minusDays(1)
-            val startDate = challenge.startDate
+            val startDate = maxOf(challenge.startDate, challenge.checkInResetDate ?: challenge.startDate)
 
             if (startDate.isAfter(yesterday)) {
                 return@combine emptyList()
