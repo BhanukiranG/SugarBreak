@@ -65,9 +65,11 @@ fun HomeScreen(
     onNavigateToHistory: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {},
     onNavigateToUserDetails: () -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    avatarViewModel: com.main.sugarbreak.ui.components.ProfileAvatarViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val avatarState by avatarViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
     val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     var showGoalDialog by remember { mutableStateOf(false) }
@@ -147,15 +149,13 @@ fun HomeScreen(
                         }
 
                         // Profile Avatar Button
-                        IconButton(
-                            onClick = onNavigateToUserDetails,
-                            modifier = Modifier.padding(start = 2.dp, end = 4.dp)
+                        com.main.sugarbreak.ui.components.ProfileAvatarImage(
+                            jpeg = avatarState.avatar.jpeg,
+                            modifier = Modifier.padding(start = 4.dp, end = 6.dp).size(48.dp),
+                            description = "User Profile",
+                            onPlaceholderClick = onNavigateToUserDetails
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "User Profile",
-                                tint = primaryColor
-                            )
+                            Icon(Icons.Default.Person, "User Profile", tint = primaryColor)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(

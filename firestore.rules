@@ -62,6 +62,17 @@ service cloud.firestore {
         allow read, write: if isOwner(userId);
       }
     }
+    match /profileAvatars/{userId} {
+      function isVerifiedOwner() {
+        return isOwner(userId) && request.auth.token.get('email_verified', false) == true;
+      }
+      allow get, delete: if isVerifiedOwner();
+      allow create, update: if isVerifiedOwner()
+        && request.resource.data.keys().hasOnly(['jpeg'])
+        && request.resource.data.jpeg is bytes
+        && request.resource.data.jpeg.size() > 0
+        && request.resource.data.jpeg.size() <= 65536;
+    }
     match /adminEdits/{editId} {
       allow read: if isAdmin();
       allow create: if isAdmin()

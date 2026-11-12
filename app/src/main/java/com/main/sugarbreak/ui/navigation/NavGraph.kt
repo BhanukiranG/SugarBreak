@@ -5,6 +5,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -21,6 +22,7 @@ import com.main.sugarbreak.ui.settings.SettingsScreen
 import com.main.sugarbreak.ui.settings.UserDetailsScreen
 import com.main.sugarbreak.ui.statistics.StatisticsScreen
 import com.main.sugarbreak.ui.auth.AuthScreen
+import com.main.sugarbreak.ui.components.ProfileAvatarViewModel
 
 @Composable
 fun AppNavGraph(
@@ -29,6 +31,7 @@ fun AppNavGraph(
     startDestination: String = "home",
     onAuthenticated: () -> Unit = {}
 ) {
+    val avatarViewModel: ProfileAvatarViewModel = hiltViewModel()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -71,6 +74,7 @@ fun AppNavGraph(
             }
             composable("home") {
                 HomeScreen(
+                    avatarViewModel = avatarViewModel,
                     onNavigateToCheckIn = { date ->
                         if (date != null) navController.navigate("checkin?date=$date")
                         else navController.navigate("checkin")
@@ -118,6 +122,7 @@ fun AppNavGraph(
             }
             composable("settings") {
                 SettingsScreen(
+                    avatarViewModel = avatarViewModel,
                     onNavigateToUserDetails = {
                         navController.navigate("userdetails")
                     },
@@ -137,6 +142,7 @@ fun AppNavGraph(
             }
             composable("userdetails") {
                 UserDetailsScreen(
+                    avatarViewModel = avatarViewModel,
                     onNavigateBack = {
                         navController.popBackStack()
                     }

@@ -5,6 +5,7 @@ import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, serverT
 import { ADMIN_EMAIL } from '../src/domain.mjs';
 import assert from 'node:assert/strict';
 import { readPage, readProfile, saveEdit } from '../src/data.ts';
+import { Bytes } from 'firebase/firestore';
 let env;
 before(async () => {
   env = await initializeTestEnvironment({ projectId: 'demo-sugarbreak-admin', firestore: { host: '127.0.0.1', port: 8088, rules: await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8') } });
@@ -17,6 +18,36 @@ before(async () => {
 });
 after(async () => { await env?.cleanup(); });
 const admin = () => env.authenticatedContext('admin-uid', { email: ADMIN_EMAIL, email_verified: true, admin: true }).firestore();
+
+test('only the verified owner can read and manage a private avatar', async () => {
+  const path = 'profileAvatars/avatar-owner';
+  const owner = env.authenticatedContext('avatar-owner', { email_verified: true }).firestore();
+  const photo = doc(owner, path);
+  const original = Bytes.fromUint8Array(Uint8Array.of(1, 2));
+  const replacement = Bytes.fromUint8Array(Uint8Array.of(3, 4));
+  await assertSucceeds(setDoc(photo, { jpeg: original }));
+  assert.ok((await assertSucceeds(getDoc(photo))).data().jpeg.isEqual(original));
+  for (const db of [
+    admin(),
+    env.unauthenticatedContext().firestore(),
+    env.authenticatedContext('other', { email_verified: true }).firestore(),
+    env.authenticatedContext('avatar-owner', { email_verified: false }).firestore()
+  ]) {
+    const otherPhoto = doc(db, path);
+    await assertFails(getDoc(otherPhoto));
+    await assertFails(setDoc(otherPhoto, { jpeg: replacement }));
+    await assertFails(deleteDoc(otherPhoto));
+  }
+  await assertFails(getDocs(collection(owner, 'profileAvatars')));
+  await assertFails(setDoc(photo, { jpeg: Bytes.fromUint8Array(new Uint8Array(65537)) }));
+  await assertFails(setDoc(photo, { jpeg: Bytes.fromUint8Array(new Uint8Array()) }));
+  await assertFails(setDoc(photo, { jpeg: 'not binary' }));
+  await assertFails(setDoc(photo, { jpeg: replacement, extra: true }));
+  await assertSucceeds(setDoc(photo, { jpeg: replacement }));
+  assert.ok((await assertSucceeds(getDoc(photo))).data().jpeg.isEqual(replacement));
+  await assertSucceeds(deleteDoc(photo));
+  assert.equal((await assertSucceeds(getDoc(photo))).exists(), false);
+});
 test('signed-out clients cannot list profiles', async () => { await assertFails(getDocs(collection(env.unauthenticatedContext().firestore(), 'users'))); });
 test('regular users keep their own access but cannot list everyone', async () => {
   const db = env.authenticatedContext('user-a').firestore();

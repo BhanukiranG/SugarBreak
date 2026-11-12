@@ -1,5 +1,8 @@
 package com.main.sugarbreak.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -51,15 +55,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.sugarbreak.ui.components.GlassCard
+import com.main.sugarbreak.ui.components.ProfileAvatarImage
+import com.main.sugarbreak.ui.components.ProfileAvatarViewModel
 import com.main.sugarbreak.ui.components.SugarBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDetailsScreen(
     onNavigateBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    avatarViewModel: ProfileAvatarViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val avatarState by avatarViewModel.state.collectAsState()
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia(), avatarViewModel::select)
+    val photoBusy = avatarState.busy || avatarState.avatar.pending
+    val canEditPhoto = avatarState.avatar.uid != null && !photoBusy
+    val choosePhoto = {
+        if (avatarViewModel.beginPicker()) {
+            picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+    }
     val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val primaryColor = MaterialTheme.colorScheme.primary
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
@@ -133,12 +149,13 @@ fun UserDetailsScreen(
                             .border(3.dp, primaryContainer, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = primaryColor,
-                            modifier = Modifier.size(54.dp)
-                        )
+                        ProfileAvatarImage(
+                            jpeg = avatarState.preview ?: avatarState.avatar.jpeg,
+                            modifier = Modifier.fillMaxSize(),
+                            description = "Profile picture"
+                        ) {
+                            Icon(Icons.Default.Person, null, Modifier.size(54.dp), tint = primaryColor)
+                        }
                     }
 
                     Box(
@@ -147,17 +164,41 @@ fun UserDetailsScreen(
                             .clip(CircleShape)
                             .background(primaryContainer)
                             .border(2.dp, if (isDark) Color(0xFF131C26) else Color.White, CircleShape)
-                            .align(Alignment.BottomEnd),
+                            .align(Alignment.BottomEnd)
+                            .clickable(enabled = canEditPhoto, onClick = choosePhoto),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = null,
+                            contentDescription = "Choose profile photo",
                             tint = Color.White,
                             modifier = Modifier.size(14.dp)
                         )
                     }
                 }
+
+                if (avatarState.preview != null) {
+                    Row {
+                        TextButton(onClick = avatarViewModel::cancelPreview, enabled = !photoBusy) {
+                            Text("Cancel preview")
+                        }
+                        Button(onClick = avatarViewModel::savePreview, enabled = canEditPhoto) {
+                            Text("Save photo")
+                        }
+                    }
+                } else if (avatarState.avatar.jpeg != null) {
+                    Row {
+                        TextButton(onClick = choosePhoto, enabled = canEditPhoto) { Text("Replace photo") }
+                        TextButton(onClick = avatarViewModel::remove, enabled = canEditPhoto) { Text("Remove photo") }
+                    }
+                } else {
+                    TextButton(onClick = choosePhoto, enabled = canEditPhoto) { Text("Choose photo") }
+                }
+                if (photoBusy) {
+                    Text(if (avatarState.avatar.pending) "Photo change pending sync" else "Updating photo…")
+                }
+                val photoError = avatarState.error ?: if (avatarState.avatar.readFailed) "Could not load your photo." else null
+                if (photoError != null) Text(photoError, color = MaterialTheme.colorScheme.error)
 
                 Text(
                     text = if (name.isBlank() || name == "Local Profile") "Your Profile" else name,

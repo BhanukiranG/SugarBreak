@@ -81,6 +81,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.sugarbreak.R
 import com.main.sugarbreak.domain.model.ChallengeBehavior
 import com.main.sugarbreak.ui.components.GlassCard
+import com.main.sugarbreak.ui.components.ProfileAvatarImage
+import com.main.sugarbreak.ui.components.ProfileAvatarViewModel
 import com.main.sugarbreak.ui.components.SugarBackground
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -92,9 +94,11 @@ fun SettingsScreen(
     onNavigateToUserDetails: () -> Unit,
     onNavigateToThemeSelection: () -> Unit,
     onNavigateToHome: () -> Unit = {},
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    avatarViewModel: ProfileAvatarViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val avatarState by avatarViewModel.state.collectAsState()
     val isDark = com.main.sugarbreak.ui.theme.LocalIsDarkTheme.current
     val context = LocalContext.current
 
@@ -184,12 +188,13 @@ fun SettingsScreen(
                                         .border(2.dp, primaryContainer.copy(alpha = 0.6f), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = null,
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(30.dp)
-                                    )
+                                    ProfileAvatarImage(
+                                        jpeg = avatarState.avatar.jpeg,
+                                        modifier = Modifier.fillMaxSize(),
+                                        description = "Profile picture"
+                                    ) {
+                                        Icon(Icons.Default.Person, null, Modifier.size(30.dp), tint = primaryColor)
+                                    }
                                 }
                                 Box(
                                     modifier = Modifier
