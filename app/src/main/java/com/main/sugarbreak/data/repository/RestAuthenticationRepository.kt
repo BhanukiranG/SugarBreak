@@ -14,7 +14,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
+import com.chuckerteam.chucker.api.ChuckerInterceptor
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 import java.net.URL
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -29,6 +34,18 @@ internal class ApiError(val status: Int) : Exception("SugarBreak server returned
 @Singleton
 class RestAuthenticationRepository @Inject constructor(@ApplicationContext context: Context) : AuthenticationRepository {
     private val secrets = context.getSharedPreferences("rest-session", Context.MODE_PRIVATE)
+    private val client = OkHttpClient.Builder()
+        .followRedirects(false)
+        .followSslRedirects(false)
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .addInterceptor(
+            ChuckerInterceptor.Builder(context)
+                .redactHeaders("Authorization", "Cookie", "Set-Cookie")
+                .maxContentLength(0L)
+                .build()
+        )
+        .build()
     private val lock = Mutex()
     private var accessToken: String? = null
     override val currentUser = MutableStateFlow(restoreAccount())
@@ -96,24 +113,14 @@ class RestAuthenticationRepository @Inject constructor(@ApplicationContext conte
                              contentType: String = "application/json"): ByteArray = withContext(Dispatchers.IO) {
         val url = URL(BuildConfig.SUGARBREAK_API_URL.trimEnd('/') + "/api/v1" + path)
         require(url.protocol == "https") { "SugarBreak requires HTTPS." }
-        val connection = url.openConnection() as HttpURLConnection
-        try {
-            connection.instanceFollowRedirects = false
-            connection.connectTimeout = 5000
-            connection.readTimeout = 10000
-            connection.requestMethod = method
-            if (token != null) connection.setRequestProperty("Authorization", "Bearer $token")
-            if (body != null) {
-                connection.doOutput = true
-                connection.setRequestProperty("Content-Type", contentType)
-                connection.setFixedLengthStreamingMode(body.size)
-                connection.outputStream.use { it.write(body) }
-            }
-            val code = connection.responseCode
-            if (code !in 200..299) throw ApiError(code)
-            connection.inputStream.use { it.readBytes() }
-        } finally {
-            connection.disconnect()
+        val requestBody = body?.toRequestBody(contentType.toMediaType())
+            ?: if (method == "POST" || method == "PUT") ByteArray(0).toRequestBody() else null
+        val request = Request.Builder().url(url).method(method, requestBody).apply {
+            if (token != null) header("Authorization", "Bearer $token")
+        }.build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw ApiError(response.code)
+            response.body?.bytes() ?: ByteArray(0)
         }
     }
 

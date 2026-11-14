@@ -382,6 +382,16 @@ fun SettingsScreen(
                         }
                     }
 
+                    if (com.main.sugarbreak.BuildConfig.DEBUG) {
+                        androidx.compose.material3.TextButton(
+                            onClick = {
+                                context.startActivity(com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context))
+                            }
+                        ) {
+                            Text("API calls (Chucker)")
+                        }
+                    }
+
                     // Section 3: Data & Philosophy
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
