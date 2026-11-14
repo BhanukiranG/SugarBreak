@@ -39,12 +39,25 @@ class RestAuthenticationRepository @Inject constructor(@ApplicationContext conte
         .followSslRedirects(false)
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
-        .addInterceptor(
-            ChuckerInterceptor.Builder(context)
+        .apply {
+            val metadataOnly = ChuckerInterceptor.Builder(context)
                 .redactHeaders("Authorization", "Cookie", "Set-Cookie")
                 .maxContentLength(0L)
                 .build()
-        )
+            val withBodies = ChuckerInterceptor.Builder(context)
+                .redactHeaders("Authorization", "Cookie", "Set-Cookie")
+                .maxContentLength(256 * 1024L)
+                .build()
+            addInterceptor { chain ->
+                val path = chain.request().url.encodedPath
+                val inspector = if (path.startsWith("/api/v1/auth/") || path == "/api/v1/me/avatar") {
+                    metadataOnly
+                } else {
+                    withBodies
+                }
+                inspector.intercept(chain)
+            }
+        }
         .build()
     private val lock = Mutex()
     private var accessToken: String? = null
