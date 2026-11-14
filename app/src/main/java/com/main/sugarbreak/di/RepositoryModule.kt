@@ -12,6 +12,10 @@ import com.main.sugarbreak.domain.repository.CheckInRepository
 import com.main.sugarbreak.domain.repository.PreferencesRepository
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import com.main.sugarbreak.BuildConfig
+import com.main.sugarbreak.data.repository.RestAuthenticationRepository
+import com.main.sugarbreak.data.repository.RestProgressSyncRepository
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -20,13 +24,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
-    @Binds
-    @Singleton
-    abstract fun bindAuthenticationRepository(impl: FirebaseAuthenticationRepository): AuthenticationRepository
+    companion object {
+        @Provides
+        @Singleton
+        fun authentication(firebase: javax.inject.Provider<FirebaseAuthenticationRepository>,
+                           rest: javax.inject.Provider<RestAuthenticationRepository>): AuthenticationRepository =
+            if (BuildConfig.SUGARBREAK_API_URL.isEmpty()) firebase.get() else rest.get()
 
-    @Binds
-    @Singleton
-    abstract fun bindProgressSyncRepository(impl: FirestoreProgressSyncRepository): ProgressSyncRepository
+        @Provides
+        @Singleton
+        fun progress(firebase: javax.inject.Provider<FirestoreProgressSyncRepository>,
+                     rest: javax.inject.Provider<RestProgressSyncRepository>): ProgressSyncRepository =
+            if (BuildConfig.SUGARBREAK_API_URL.isEmpty()) firebase.get() else rest.get()
+    }
 
     @Binds
     @Singleton

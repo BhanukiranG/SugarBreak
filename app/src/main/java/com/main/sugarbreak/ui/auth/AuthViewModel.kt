@@ -1,5 +1,7 @@
 package com.main.sugarbreak.ui.auth
 
+import com.main.sugarbreak.data.repository.RestAuthenticationRepository
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.sugarbreak.domain.repository.AuthenticationRepository
@@ -53,6 +55,12 @@ class AuthViewModel @Inject constructor(
                 }
             }
             AuthMode.REGISTER -> {
+                if (authenticationRepository is RestAuthenticationRepository) {
+                    require(current.password.length >= 12) { "Use at least 12 characters." }
+                    authenticationRepository.registerWithEmail(current.email, current.password)
+                    _state.update { it.copy(mode = AuthMode.SIGN_IN, message = "Account created. Sign in to continue.") }
+                    return@runAction
+                }
                 require(current.password.length >= 6) { "Password must be at least 6 characters" }
                 authenticationRepository.registerWithEmail(current.email, current.password)
                 _state.update { it.copy(mode = AuthMode.VERIFY_EMAIL, message = "Verification email sent. Check your inbox.") }

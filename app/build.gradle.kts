@@ -16,6 +16,9 @@ android {
     compileSdk = 35
 
     defaultConfig {
+        val api = providers.gradleProperty("sugarbreakApiUrl").orElse("https://sugarbreak-api.onrender.com").get()
+        require(api.isEmpty() || Regex("https://[A-Za-z0-9.-]+(:[0-9]+)?").matches(api))
+        buildConfigField("String", "SUGARBREAK_API_URL", "\"$api\"")
         applicationId = "com.main.sugarbreak"
         minSdk = 26
         targetSdk = 35
@@ -43,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     room {
         schemaDirectory("$projectDir/schemas")

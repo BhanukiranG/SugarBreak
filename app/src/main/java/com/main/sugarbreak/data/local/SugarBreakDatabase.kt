@@ -13,16 +13,22 @@ import com.main.sugarbreak.data.local.entity.DailyCheckInEntity
 import com.main.sugarbreak.data.local.entity.PendingCheckInResetEntity
 
 @Database(
-    entities = [ChallengeEntity::class, DailyCheckInEntity::class, PendingCheckInResetEntity::class],
-    version = 5,
+    entities = [ChallengeEntity::class, DailyCheckInEntity::class, PendingCheckInResetEntity::class, RestSyncState::class],
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class SugarBreakDatabase : RoomDatabase() {
     abstract val challengeDao: ChallengeDao
     abstract val dailyCheckInDao: DailyCheckInDao
+    abstract val restSyncDao: RestSyncDao
 
     companion object {
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS rest_sync_state (uid TEXT NOT NULL PRIMARY KEY, state TEXT NOT NULL)")
+            }
+        }
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE challenges ADD COLUMN checkInResetDate TEXT")

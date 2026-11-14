@@ -13,6 +13,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.CancellationException
+import com.main.sugarbreak.BuildConfig
+import javax.inject.Provider
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,11 +44,13 @@ internal fun observeAccountAvatars(
 @Singleton
 class ProfileAvatarRepository @Inject constructor(
     private val services: FirebaseServices,
-    private val authentication: AuthenticationRepository
+    private val authentication: AuthenticationRepository,
+    private val rest: Provider<RestAuthenticationRepository>? = null
 ) {
+    private val restPhoto = MutableStateFlow(ProfileAvatar())
     val avatar = observeAccountAvatars(
         authentication.currentUser.map { it?.takeIf { user -> user.emailVerified }?.uid },
-        ::observe
+        { uid -> if (BuildConfig.SUGARBREAK_API_URL.isEmpty()) observe(uid) else observeRest(uid) }
     )
 
     fun isCurrentAccount(uid: String): Boolean =
@@ -49,6 +58,13 @@ class ProfileAvatarRepository @Inject constructor(
 
     suspend fun save(uid: String, jpeg: ByteArray?) {
         check(isCurrentAccount(uid)) { "The signed-in account changed" }
+        if (BuildConfig.SUGARBREAK_API_URL.isNotEmpty()) {
+            if (jpeg != null) require(jpeg.size in 1..MAX_AVATAR_BYTES)
+            checkNotNull(rest).get().request(uid, if (jpeg == null) "DELETE" else "PUT",
+                "/me/avatar", jpeg, "image/jpeg")
+            if (isCurrentAccount(uid)) restPhoto.value = ProfileAvatar(uid, jpeg)
+            return
+        }
         val reference = checkNotNull(services.firestore).collection("profileAvatars").document(uid)
         if (jpeg == null) {
             reference.delete().await()
@@ -56,6 +72,20 @@ class ProfileAvatarRepository @Inject constructor(
             require(jpeg.size in 1..MAX_AVATAR_BYTES)
             reference.set(mapOf("jpeg" to Blob.fromBytes(jpeg))).await()
         }
+    }
+
+    private fun observeRest(uid: String) = flow {
+        val avatar = try {
+            ProfileAvatar(uid, checkNotNull(rest).get().request(uid, "GET", "/me/avatar"))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: ApiError) {
+            ProfileAvatar(uid, readFailed = error.status != 404)
+        } catch (_: Exception) {
+            ProfileAvatar(uid, readFailed = true)
+        }
+        if (isCurrentAccount(uid)) restPhoto.value = avatar
+        emitAll(restPhoto.filter { it.uid == uid })
     }
 
     private fun observe(uid: String) = callbackFlow {

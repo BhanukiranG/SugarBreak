@@ -206,7 +206,8 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, viewModel: AuthViewModel = hilt
                                 )
                             }
                         }
-                        if (state.mode == AuthMode.SIGN_IN || state.mode == AuthMode.REGISTER) {
+                        if (com.main.sugarbreak.BuildConfig.SUGARBREAK_API_URL.isEmpty() &&
+                            (state.mode == AuthMode.SIGN_IN || state.mode == AuthMode.REGISTER)) {
                             Spacer(Modifier.height(8.dp))
                             OutlinedButton(
                                 onClick = {
@@ -261,8 +262,10 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, viewModel: AuthViewModel = hilt
                             TextButton(onClick = { viewModel.setMode(AuthMode.REGISTER) }) {
                                 Text("Create an account")
                             }
-                            TextButton(onClick = { viewModel.setMode(AuthMode.RESET_PASSWORD) }) {
-                                Text("Forgot password?")
+                            if (com.main.sugarbreak.BuildConfig.SUGARBREAK_API_URL.isEmpty()) {
+                                TextButton(onClick = { viewModel.setMode(AuthMode.RESET_PASSWORD) }) {
+                                    Text("Forgot password?")
+                                }
                             }
                         }
                         AuthMode.REGISTER, AuthMode.RESET_PASSWORD ->

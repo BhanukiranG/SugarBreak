@@ -25,7 +25,7 @@ object DataModule {
             SugarBreakDatabase::class.java,
             "sugarbreak_db"
         )
-        .addMigrations(SugarBreakDatabase.MIGRATION_2_3, SugarBreakDatabase.MIGRATION_3_4, SugarBreakDatabase.MIGRATION_4_5)
+        .addMigrations(SugarBreakDatabase.MIGRATION_2_3, SugarBreakDatabase.MIGRATION_3_4, SugarBreakDatabase.MIGRATION_4_5, SugarBreakDatabase.MIGRATION_5_6)
         .build()
     }
 
